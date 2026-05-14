@@ -3,4 +3,5 @@ dist/
 .env
 .env.local
 data/
+.playwright-mcp/
 .vercel
