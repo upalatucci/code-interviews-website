@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Interview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<!-- Loading / error states -->
+<div id="loading-state" class="centered-state">
+  <div style="width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite"></div>
+  <p>Loading challenge…</p>
+</div>
+
+<div id="error-state" class="centered-state" style="display:none">
+  <div style="font-size:48px">⚠️</div>
+  <h2>Link not found</h2>
+  <p>This interview link is invalid or has expired.</p>
+</div>
+
+<!-- Main interview layout -->
+<div id="interview-app" style="display:none">
+  <div class="interview-layout">
+
+    <!-- Problem panel -->
+    <div class="problem-panel">
+      <div class="problem-header">
+        <span class="logo">&#9679; Interview</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="timer-label" style="font-size:11px;color:var(--text-muted);display:none">TIME LEFT</span>
+          <div class="timer" id="timer">00:00</div>
+        </div>
+      </div>
+        <div class="problem-body">
+          <h2 id="problem-title"></h2>
+          <div class="problem-description" id="problem-description"></div>
+          <div id="questions-section"></div>
+        </div>
+    </div>
+
+    <!-- Editor panel -->
+    <div class="editor-panel">
+      <div class="editor-toolbar">
+        <div class="toolbar-left">
+          <span class="lang-badge" id="lang-badge">JS</span>
+          <span class="autosave-status" id="autosave-status">Auto-save on</span>
+        </div>
+        <div class="toolbar-right">
+          <button id="submit-btn" class="btn btn-success" onclick="submitCode()">
+            Submit solution ↗
+          </button>
+        </div>
+      </div>
+      <div id="editor-container"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Paste warning overlay -->
+<div id="paste-warning" class="paste-warning">
+  <div class="paste-warning-msg">⛔ Paste is disabled for this interview</div>
+</div>
+
+<!-- Submitted overlay -->
+<div id="submitted-overlay" class="submitted-overlay">
+  <div class="submitted-box">
+    <div class="icon">✅</div>
+    <h2>Solution submitted!</h2>
+    <p>Your code has been saved. The interviewer will review it shortly.</p>
+    <p style="margin-top:12px;font-size:12px;color:var(--text-muted)">You may close this tab.</p>
+  </div>
+</div>
+
+<!-- Submit confirm modal -->
+<div id="confirm-modal" class="modal-backdrop">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3>Submit your solution?</h3>
+      <button class="modal-close" onclick="closeConfirm()">×</button>
+    </div>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Once submitted you can no longer edit your code. Make sure you're done!</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Keep editing</button>
+      <button class="btn btn-success" onclick="confirmSubmit()">Yes, submit</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
+<script src="/js/interview.js"></script>
+</body>
+</html>

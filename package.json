@@ -1,0 +1,19 @@
+{
+  "name": "code-interviews",
+  "version": "1.0.0",
+  "description": "Async code interview platform",
+  "scripts": {
+    "build": "esbuild src/admin.ts src/interview.ts --bundle --outdir=public/js --target=es2020 --platform=browser",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.17",
+    "@vercel/node": "^5.1.14",
+    "esbuild": "^0.25.4",
+    "monaco-editor": "^0.55.1",
+    "typescript": "^5.8.3"
+  }
+}
