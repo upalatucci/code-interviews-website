@@ -307,8 +307,9 @@ function renderLinks(links: InterviewLink[]): void {
           <button class="btn btn-ghost btn-sm" style="margin-top:4px" onclick="copyText('${url}')">Copy</button>
         </td>
         <td>
-          <div style="display:flex;gap:6px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
             ${l.submitted_at || l.first_opened_at ? `<button class="btn btn-ghost btn-sm" onclick="viewSubmission(${l.id},'${esc(l.candidate_name || 'Candidate')}')">View</button>` : ''}
+            <button class="btn btn-ghost btn-sm" title="Generate a new link for the same challenge" onclick="cloneLink(${l.challenge_id},'${esc(l.challenge_title ?? '')}')">Clone</button>
             <button class="btn btn-danger btn-sm" onclick="deleteLink(${l.id})">×</button>
           </div>
         </td>
@@ -317,7 +318,7 @@ function renderLinks(links: InterviewLink[]): void {
   }).join('');
 }
 
-function openLinkModal(preselect?: number): void {
+function openLinkModal(preselect?: number, title?: string): void {
   const sel = document.getElementById('l-challenge') as HTMLSelectElement;
   sel.innerHTML = challenges.map(c =>
     `<option value="${c.id}" ${c.id === preselect ? 'selected' : ''}>${esc(c.title)}</option>`
@@ -330,7 +331,16 @@ function openLinkModal(preselect?: number): void {
   tokenEl.textContent = '';
   const linkActions = document.getElementById('link-actions');
   if (linkActions) linkActions.style.display = 'none';
+  (document.getElementById('link-modal-title') as HTMLElement).textContent =
+    title ?? 'Generate Interview Link';
   openModal('link-modal');
+  // Focus name field after open
+  setTimeout(() => (document.getElementById('l-name') as HTMLInputElement).focus(), 50);
+}
+
+function cloneLink(challengeId: number, challengeTitle: string): void {
+  if (!challenges.length) loadChallenges().then(() => openLinkModal(challengeId, `Clone — ${challengeTitle}`));
+  else openLinkModal(challengeId, `Clone — ${challengeTitle}`);
 }
 
 async function generateLink(): Promise<void> {
@@ -406,6 +416,9 @@ async function viewSubmission(linkId: number, name: string): Promise<void> {
 
     showPage('submission-detail');
     (document.getElementById('detail-title') as HTMLElement).textContent = name || 'Submission';
+    // Wire up the clone button in the detail header
+    const cloneBtn = document.getElementById('detail-clone-btn') as HTMLButtonElement;
+    cloneBtn.onclick = () => cloneLink(link.challenge_id!, esc(link.challenge_title ?? ''));
 
     const { link, saves } = data;
     (document.getElementById('submission-meta') as HTMLElement).innerHTML = `
@@ -591,6 +604,7 @@ declare global {
     addQuestion: typeof addQuestion;
     removeQuestion: typeof removeQuestion;
     setDescTab: typeof setDescTab;
+    cloneLink: typeof cloneLink;
   }
 }
 Object.assign(window, {
@@ -598,6 +612,7 @@ Object.assign(window, {
   quickLink, openLinkModal, generateLink, copyGeneratedLink, deleteLink,
   viewSubmission, previewSave, copyCode, openModal, closeModal,
   loadSubmissions, copyText, showPage, addQuestion, removeQuestion, setDescTab,
+  cloneLink,
 });
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────

@@ -252,8 +252,9 @@
           <button class="btn btn-ghost btn-sm" style="margin-top:4px" onclick="copyText('${url}')">Copy</button>
         </td>
         <td>
-          <div style="display:flex;gap:6px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
             ${l.submitted_at || l.first_opened_at ? `<button class="btn btn-ghost btn-sm" onclick="viewSubmission(${l.id},'${esc(l.candidate_name || "Candidate")}')">View</button>` : ""}
+            <button class="btn btn-ghost btn-sm" title="Generate a new link for the same challenge" onclick="cloneLink(${l.challenge_id},'${esc(l.challenge_title ?? "")}')">Clone</button>
             <button class="btn btn-danger btn-sm" onclick="deleteLink(${l.id})">\xD7</button>
           </div>
         </td>
@@ -261,7 +262,7 @@
     `;
     }).join("");
   }
-  function openLinkModal(preselect) {
+  function openLinkModal(preselect, title) {
     const sel = document.getElementById("l-challenge");
     sel.innerHTML = challenges.map(
       (c) => `<option value="${c.id}" ${c.id === preselect ? "selected" : ""}>${esc(c.title)}</option>`
@@ -274,7 +275,13 @@
     tokenEl.textContent = "";
     const linkActions = document.getElementById("link-actions");
     if (linkActions) linkActions.style.display = "none";
+    document.getElementById("link-modal-title").textContent = title ?? "Generate Interview Link";
     openModal("link-modal");
+    setTimeout(() => document.getElementById("l-name").focus(), 50);
+  }
+  function cloneLink(challengeId, challengeTitle) {
+    if (!challenges.length) loadChallenges().then(() => openLinkModal(challengeId, `Clone \u2014 ${challengeTitle}`));
+    else openLinkModal(challengeId, `Clone \u2014 ${challengeTitle}`);
   }
   async function generateLink() {
     const challenge_id = +document.getElementById("l-challenge").value;
@@ -352,6 +359,8 @@
       if (!data) return;
       showPage("submission-detail");
       document.getElementById("detail-title").textContent = name || "Submission";
+      const cloneBtn = document.getElementById("detail-clone-btn");
+      cloneBtn.onclick = () => cloneLink(link.challenge_id, esc(link.challenge_title ?? ""));
       const { link, saves } = data;
       document.getElementById("submission-meta").innerHTML = `
       <div class="meta-item"><div class="label">Candidate</div><div class="value">${esc(link.candidate_name || "\u2014")}</div></div>
@@ -534,7 +543,8 @@
     showPage,
     addQuestion,
     removeQuestion,
-    setDescTab
+    setDescTab,
+    cloneLink
   });
   var saved = localStorage.getItem("adminKey");
   if (saved) {

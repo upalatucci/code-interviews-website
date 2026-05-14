@@ -135,6 +135,7 @@
             <button class="btn btn-ghost btn-sm" onclick="showPage('submissions')">← Back</button>
             <h2 id="detail-title">Submission</h2>
           </div>
+          <button id="detail-clone-btn" class="btn btn-primary btn-sm">Clone for another candidate</button>
         </div>
         <div id="submission-meta" class="submission-meta"></div>
         <div id="answers-block-container"></div>
@@ -217,7 +218,7 @@
 <div id="link-modal" class="modal-backdrop">
   <div class="modal">
     <div class="modal-header">
-      <h3>Generate Interview Link</h3>
+      <h3 id="link-modal-title">Generate Interview Link</h3>
       <button class="modal-close" onclick="closeModal('link-modal')">×</button>
     </div>
     <div class="form-group">
