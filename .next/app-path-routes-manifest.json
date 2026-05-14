@@ -1,0 +1,17 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/auth/[...nextauth]/route": "/api/auth/[...nextauth]",
+  "/api/interview/[token]/route": "/api/interview/[token]",
+  "/api/interview/[token]/start/route": "/api/interview/[token]/start",
+  "/api/interview/[token]/submit/route": "/api/interview/[token]/submit",
+  "/api/interview/[token]/save/route": "/api/interview/[token]/save",
+  "/auth/verify-request/page": "/auth/verify-request",
+  "/page": "/",
+  "/auth/signin/page": "/auth/signin",
+  "/interview/[token]/page": "/interview/[token]",
+  "/admin/links/page": "/admin/links",
+  "/admin/page": "/admin",
+  "/admin/interviews/page": "/admin/interviews",
+  "/admin/submissions/[linkId]/page": "/admin/submissions/[linkId]",
+  "/admin/submissions/page": "/admin/submissions"
+}

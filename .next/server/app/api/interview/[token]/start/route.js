@@ -1,0 +1,61 @@
+(()=>{var a={};a.id=980,a.ids=[980],a.modules={261:a=>{"use strict";a.exports=require("next/dist/shared/lib/router/utils/app-paths")},3295:a=>{"use strict";a.exports=require("next/dist/server/app-render/after-task-async-storage.external.js")},10846:a=>{"use strict";a.exports=require("next/dist/compiled/next-server/app-page.runtime.prod.js")},19121:a=>{"use strict";a.exports=require("next/dist/server/app-render/action-async-storage.external.js")},27143:(a,b,c)=>{"use strict";c.d(b,{CY:()=>j,K_:()=>h,fv:()=>i,ll:()=>f,vs:()=>k});var d=c(9608);let e=null;function f(a,...b){return(function(){if(!e){if(!process.env.POSTGRES_URL)throw Error("POSTGRES_URL env var is not set");e=(0,d.lw)(process.env.POSTGRES_URL,{fullResults:!0})}return e})()(a,...b)}let g=!1;async function h(){g||(await f`CREATE TABLE IF NOT EXISTS challenges (
+    id                 SERIAL PRIMARY KEY,
+    title              TEXT NOT NULL,
+    time_limit_minutes INTEGER DEFAULT NULL,
+    created_at         TIMESTAMPTZ DEFAULT NOW()
+  )`,await f`CREATE TABLE IF NOT EXISTS coding_challenges (
+    id           SERIAL PRIMARY KEY,
+    challenge_id INTEGER NOT NULL REFERENCES challenges(id) ON DELETE CASCADE,
+    title        TEXT NOT NULL DEFAULT '',
+    description  TEXT NOT NULL DEFAULT '',
+    starter_code TEXT DEFAULT '',
+    language     TEXT DEFAULT 'javascript',
+    position     INTEGER DEFAULT 0,
+    created_at   TIMESTAMPTZ DEFAULT NOW()
+  )`,await f`CREATE TABLE IF NOT EXISTS interview_questions (
+    id           SERIAL PRIMARY KEY,
+    challenge_id INTEGER NOT NULL REFERENCES challenges(id) ON DELETE CASCADE,
+    text         TEXT NOT NULL DEFAULT '',
+    position     INTEGER DEFAULT 0,
+    created_at   TIMESTAMPTZ DEFAULT NOW()
+  )`,await f`CREATE TABLE IF NOT EXISTS interview_links (
+    id              SERIAL PRIMARY KEY,
+    challenge_id    INTEGER NOT NULL REFERENCES challenges(id) ON DELETE CASCADE,
+    token           TEXT UNIQUE NOT NULL,
+    candidate_name  TEXT DEFAULT '',
+    candidate_email TEXT DEFAULT '',
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    first_opened_at TIMESTAMPTZ,
+    started_at      TIMESTAMPTZ,
+    submitted_at    TIMESTAMPTZ
+  )`,await f`CREATE TABLE IF NOT EXISTS saves (
+    id       SERIAL PRIMARY KEY,
+    link_id  INTEGER NOT NULL REFERENCES interview_links(id) ON DELETE CASCADE,
+    codes    TEXT NOT NULL DEFAULT '{}',
+    answers  TEXT NOT NULL DEFAULT '{}',
+    saved_at TIMESTAMPTZ DEFAULT NOW(),
+    is_final BOOLEAN NOT NULL DEFAULT FALSE
+  )`,await f`CREATE TABLE IF NOT EXISTS auth_users (
+    id             TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    name           TEXT,
+    email          TEXT UNIQUE,
+    email_verified TIMESTAMPTZ,
+    image          TEXT
+  )`,await f`CREATE TABLE IF NOT EXISTS auth_verification_tokens (
+    identifier TEXT NOT NULL,
+    token      TEXT UNIQUE NOT NULL,
+    expires    TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY (identifier, token)
+  )`,await f`ALTER TABLE interview_links ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ`,await f`ALTER TABLE saves ADD COLUMN IF NOT EXISTS codes    TEXT    NOT NULL DEFAULT '{}'`,await f`ALTER TABLE saves ADD COLUMN IF NOT EXISTS answers  TEXT    NOT NULL DEFAULT '{}'`,await f`ALTER TABLE saves ADD COLUMN IF NOT EXISTS is_final BOOLEAN NOT NULL DEFAULT FALSE`,g=!0)}async function i(){await h();let{rows:a}=await f`SELECT * FROM challenges ORDER BY created_at DESC`;for(let b of a){let{rows:a}=await f`SELECT * FROM coding_challenges WHERE challenge_id = ${b.id} ORDER BY position`,{rows:c}=await f`SELECT * FROM interview_questions WHERE challenge_id = ${b.id} ORDER BY position`;b.coding_challenges=a,b.interview_questions=c}return a}async function j(){await h();let{rows:a}=await f`
+    SELECT il.*, c.title AS challenge_title
+    FROM interview_links il JOIN challenges c ON c.id = il.challenge_id
+    ORDER BY il.created_at DESC
+  `;return a}async function k(a){await h();let{rows:b}=await f`
+    SELECT il.*, c.title AS challenge_title, c.time_limit_minutes
+    FROM interview_links il JOIN challenges c ON c.id = il.challenge_id
+    WHERE il.id = ${a}
+  `;if(!b.length)return null;let c=b[0],[{rows:d},{rows:e},{rows:g}]=await Promise.all([f`SELECT id, saved_at, is_final, codes, answers FROM saves WHERE link_id = ${a} ORDER BY saved_at DESC`,f`SELECT * FROM coding_challenges WHERE challenge_id = ${c.challenge_id} ORDER BY position`,f`SELECT * FROM interview_questions WHERE challenge_id = ${c.challenge_id} ORDER BY position`]);return{link:c,saves:d,codingChallenges:e,questions:g}}},29294:a=>{"use strict";a.exports=require("next/dist/server/app-render/work-async-storage.external.js")},44870:a=>{"use strict";a.exports=require("next/dist/compiled/next-server/app-route.runtime.prod.js")},57270:(a,b,c)=>{"use strict";c.r(b),c.d(b,{handler:()=>C,patchFetch:()=>B,routeModule:()=>x,serverHooks:()=>A,workAsyncStorage:()=>y,workUnitAsyncStorage:()=>z});var d={};c.r(d),c.d(d,{POST:()=>w});var e=c(95736),f=c(9117),g=c(4044),h=c(39326),i=c(32324),j=c(261),k=c(54290),l=c(85328),m=c(38928),n=c(46595),o=c(3421),p=c(17679),q=c(41681),r=c(63446),s=c(86439),t=c(51356),u=c(10641),v=c(27143);async function w(a,{params:b}){let{token:c}=await b;try{await (0,v.K_)();let{rows:a}=await (0,v.ll)`
+      SELECT il.id, il.submitted_at, il.started_at, c.time_limit_minutes
+      FROM interview_links il JOIN challenges c ON c.id = il.challenge_id
+      WHERE il.token = ${c}
+    `;if(!a.length)return u.NextResponse.json({error:"Link not found"},{status:404});let b=a[0];if(b.submitted_at)return u.NextResponse.json({error:"Already submitted"},{status:403});b.started_at||await (0,v.ll)`UPDATE interview_links SET started_at = NOW() WHERE id = ${b.id}`;let d=b.started_at?new Date(b.started_at):new Date,e=b.time_limit_minutes?Math.floor(60*b.time_limit_minutes-(Date.now()-d.getTime())/1e3):null;return u.NextResponse.json({ok:!0,remainingSeconds:e})}catch(a){return console.error(a),u.NextResponse.json({error:"Internal server error"},{status:500})}}let x=new e.AppRouteRouteModule({definition:{kind:f.RouteKind.APP_ROUTE,page:"/api/interview/[token]/start/route",pathname:"/api/interview/[token]/start",filename:"route",bundlePath:"app/api/interview/[token]/start/route"},distDir:".next",relativeProjectDir:"",resolvedPagePath:"/Users/upalatuc/code-interviews-website/app/api/interview/[token]/start/route.ts",nextConfigOutput:"",userland:d}),{workAsyncStorage:y,workUnitAsyncStorage:z,serverHooks:A}=x;function B(){return(0,g.patchFetch)({workAsyncStorage:y,workUnitAsyncStorage:z})}async function C(a,b,c){var d;let e="/api/interview/[token]/start/route";"/index"===e&&(e="/");let g=await x.prepare(a,b,{srcPage:e,multiZoneDraftMode:!1});if(!g)return b.statusCode=400,b.end("Bad Request"),null==c.waitUntil||c.waitUntil.call(c,Promise.resolve()),null;let{buildId:u,params:v,nextConfig:w,isDraftMode:y,prerenderManifest:z,routerServerContext:A,isOnDemandRevalidate:B,revalidateOnlyGenerated:C,resolvedPathname:D}=g,E=(0,j.normalizeAppPath)(e),F=!!(z.dynamicRoutes[E]||z.routes[D]);if(F&&!y){let a=!!z.routes[D],b=z.dynamicRoutes[E];if(b&&!1===b.fallback&&!a)throw new s.NoFallbackError}let G=null;!F||x.isDev||y||(G="/index"===(G=D)?"/":G);let H=!0===x.isDev||!F,I=F&&!H,J=a.method||"GET",K=(0,i.getTracer)(),L=K.getActiveScopeSpan(),M={params:v,prerenderManifest:z,renderOpts:{experimental:{cacheComponents:!!w.experimental.cacheComponents,authInterrupts:!!w.experimental.authInterrupts},supportsDynamicResponse:H,incrementalCache:(0,h.getRequestMeta)(a,"incrementalCache"),cacheLifeProfiles:null==(d=w.experimental)?void 0:d.cacheLife,isRevalidate:I,waitUntil:c.waitUntil,onClose:a=>{b.on("close",a)},onAfterTaskError:void 0,onInstrumentationRequestError:(b,c,d)=>x.onRequestError(a,b,d,A)},sharedContext:{buildId:u}},N=new k.NodeNextRequest(a),O=new k.NodeNextResponse(b),P=l.NextRequestAdapter.fromNodeNextRequest(N,(0,l.signalFromNodeResponse)(b));try{let d=async c=>x.handle(P,M).finally(()=>{if(!c)return;c.setAttributes({"http.status_code":b.statusCode,"next.rsc":!1});let d=K.getRootSpanAttributes();if(!d)return;if(d.get("next.span_type")!==m.BaseServerSpan.handleRequest)return void console.warn(`Unexpected root span type '${d.get("next.span_type")}'. Please report this Next.js issue https://github.com/vercel/next.js`);let e=d.get("next.route");if(e){let a=`${J} ${e}`;c.setAttributes({"next.route":e,"http.route":e,"next.span_name":a}),c.updateName(a)}else c.updateName(`${J} ${a.url}`)}),g=async g=>{var i,j;let k=async({previousCacheEntry:f})=>{try{if(!(0,h.getRequestMeta)(a,"minimalMode")&&B&&C&&!f)return b.statusCode=404,b.setHeader("x-nextjs-cache","REVALIDATED"),b.end("This page could not be found"),null;let e=await d(g);a.fetchMetrics=M.renderOpts.fetchMetrics;let i=M.renderOpts.pendingWaitUntil;i&&c.waitUntil&&(c.waitUntil(i),i=void 0);let j=M.renderOpts.collectedTags;if(!F)return await (0,o.I)(N,O,e,M.renderOpts.pendingWaitUntil),null;{let a=await e.blob(),b=(0,p.toNodeOutgoingHttpHeaders)(e.headers);j&&(b[r.NEXT_CACHE_TAGS_HEADER]=j),!b["content-type"]&&a.type&&(b["content-type"]=a.type);let c=void 0!==M.renderOpts.collectedRevalidate&&!(M.renderOpts.collectedRevalidate>=r.INFINITE_CACHE)&&M.renderOpts.collectedRevalidate,d=void 0===M.renderOpts.collectedExpire||M.renderOpts.collectedExpire>=r.INFINITE_CACHE?void 0:M.renderOpts.collectedExpire;return{value:{kind:t.CachedRouteKind.APP_ROUTE,status:e.status,body:Buffer.from(await a.arrayBuffer()),headers:b},cacheControl:{revalidate:c,expire:d}}}}catch(b){throw(null==f?void 0:f.isStale)&&await x.onRequestError(a,b,{routerKind:"App Router",routePath:e,routeType:"route",revalidateReason:(0,n.c)({isRevalidate:I,isOnDemandRevalidate:B})},A),b}},l=await x.handleResponse({req:a,nextConfig:w,cacheKey:G,routeKind:f.RouteKind.APP_ROUTE,isFallback:!1,prerenderManifest:z,isRoutePPREnabled:!1,isOnDemandRevalidate:B,revalidateOnlyGenerated:C,responseGenerator:k,waitUntil:c.waitUntil});if(!F)return null;if((null==l||null==(i=l.value)?void 0:i.kind)!==t.CachedRouteKind.APP_ROUTE)throw Object.defineProperty(Error(`Invariant: app-route received invalid cache entry ${null==l||null==(j=l.value)?void 0:j.kind}`),"__NEXT_ERROR_CODE",{value:"E701",enumerable:!1,configurable:!0});(0,h.getRequestMeta)(a,"minimalMode")||b.setHeader("x-nextjs-cache",B?"REVALIDATED":l.isMiss?"MISS":l.isStale?"STALE":"HIT"),y&&b.setHeader("Cache-Control","private, no-cache, no-store, max-age=0, must-revalidate");let m=(0,p.fromNodeOutgoingHttpHeaders)(l.value.headers);return(0,h.getRequestMeta)(a,"minimalMode")&&F||m.delete(r.NEXT_CACHE_TAGS_HEADER),!l.cacheControl||b.getHeader("Cache-Control")||m.get("Cache-Control")||m.set("Cache-Control",(0,q.getCacheControlHeader)(l.cacheControl)),await (0,o.I)(N,O,new Response(l.value.body,{headers:m,status:l.value.status||200})),null};L?await g(L):await K.withPropagatedContext(a.headers,()=>K.trace(m.BaseServerSpan.handleRequest,{spanName:`${J} ${a.url}`,kind:i.SpanKind.SERVER,attributes:{"http.method":J,"http.target":a.url}},g))}catch(b){if(b instanceof s.NoFallbackError||await x.onRequestError(a,b,{routerKind:"App Router",routePath:E,routeType:"route",revalidateReason:(0,n.c)({isRevalidate:I,isOnDemandRevalidate:B})}),F)throw b;return await (0,o.I)(N,O,new Response(null,{status:500})),null}}},63033:a=>{"use strict";a.exports=require("next/dist/server/app-render/work-unit-async-storage.external.js")},78335:()=>{},86439:a=>{"use strict";a.exports=require("next/dist/shared/lib/no-fallback-error.external")},96487:()=>{}};var b=require("../../../../../webpack-runtime.js");b.C(a);var c=b.X(0,[996,608,692],()=>b(b.s=57270));module.exports=c})();

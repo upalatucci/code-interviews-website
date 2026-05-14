@@ -1,0 +1,26 @@
+{
+  "components/admin/InterviewModal.tsx -> marked": {
+    "id": 4558,
+    "files": [
+      "static/chunks/4558.58eacf9c2ca4627e.js"
+    ]
+  },
+  "components/admin/SubmissionDetail.tsx -> @monaco-editor/react": {
+    "id": 5778,
+    "files": [
+      "static/chunks/5778.a229b9379f3c23ab.js"
+    ]
+  },
+  "components/interview/InterviewClient.tsx -> @monaco-editor/react": {
+    "id": 5778,
+    "files": [
+      "static/chunks/5778.a229b9379f3c23ab.js"
+    ]
+  },
+  "components/interview/InterviewClient.tsx -> marked": {
+    "id": 4558,
+    "files": [
+      "static/chunks/4558.58eacf9c2ca4627e.js"
+    ]
+  }
+}

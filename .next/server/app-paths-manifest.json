@@ -1,0 +1,17 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/interview/[token]/route": "app/api/interview/[token]/route.js",
+  "/api/interview/[token]/start/route": "app/api/interview/[token]/start/route.js",
+  "/api/interview/[token]/submit/route": "app/api/interview/[token]/submit/route.js",
+  "/api/interview/[token]/save/route": "app/api/interview/[token]/save/route.js",
+  "/auth/verify-request/page": "app/auth/verify-request/page.js",
+  "/page": "app/page.js",
+  "/auth/signin/page": "app/auth/signin/page.js",
+  "/interview/[token]/page": "app/interview/[token]/page.js",
+  "/admin/links/page": "app/admin/links/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/admin/interviews/page": "app/admin/interviews/page.js",
+  "/admin/submissions/[linkId]/page": "app/admin/submissions/[linkId]/page.js",
+  "/admin/submissions/page": "app/admin/submissions/page.js"
+}

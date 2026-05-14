@@ -1,6 +1,3 @@
 {
-  "buildCommand": "npm run build",
-  "rewrites": [
-    { "source": "/interview/:token", "destination": "/interview.html" }
-  ]
+  "framework": "nextjs"
 }
