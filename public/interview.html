@@ -61,6 +61,36 @@
   </div>
 </div>
 
+<!-- Pre-start overlay (timed challenges only) -->
+<div id="prestart-overlay" class="prestart-overlay" style="display:none">
+  <div class="prestart-box">
+    <div class="prestart-icon">⏱️</div>
+    <h2 id="prestart-title"></h2>
+    <div class="prestart-meta" id="prestart-meta"></div>
+    <div class="prestart-rules">
+      <div class="prestart-rule">
+        <span class="rule-icon">⏱</span>
+        <span>Once you click <strong>Start</strong>, the countdown begins and <strong>cannot be paused</strong>.</span>
+      </div>
+      <div class="prestart-rule">
+        <span class="rule-icon">⛔</span>
+        <span>Copy &amp; paste is disabled for the duration of the challenge.</span>
+      </div>
+      <div class="prestart-rule">
+        <span class="rule-icon">💾</span>
+        <span>Your code is auto-saved every 30 seconds. You can close and reopen the tab — the timer keeps running.</span>
+      </div>
+      <div class="prestart-rule">
+        <span class="rule-icon">✅</span>
+        <span>Submit manually when done, or your work is submitted automatically when time runs out.</span>
+      </div>
+    </div>
+    <button class="btn btn-success" id="prestart-btn" style="width:100%;padding:14px;font-size:16px;margin-top:8px">
+      Start challenge →
+    </button>
+  </div>
+</div>
+
 <!-- Paste warning overlay -->
 <div id="paste-warning" class="paste-warning">
   <div class="paste-warning-msg">⛔ Paste is disabled for this interview</div>

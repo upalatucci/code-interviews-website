@@ -15,6 +15,8 @@ interface ChallengeData {
   timeLimitMinutes: number | null;
   /** Seconds remaining when the page loaded; null = no limit; negative = already expired */
   remainingSeconds: number | null;
+  /** true when a timed challenge hasn't been started yet */
+  needsStart: boolean;
 }
 
 type SaveStatus = 'saving' | 'saved' | '';
@@ -55,33 +57,68 @@ async function loadChallenge(): Promise<void> {
     if (data.submitted) { showSubmittedOverlay(); return; }
 
     document.title = data.title + ' — Code Interview';
-    (document.getElementById('problem-title') as HTMLElement).textContent = data.title;
-    (document.getElementById('problem-description') as HTMLElement).innerHTML = marked.parse(data.description);
-    (document.getElementById('lang-badge') as HTMLElement).textContent =
-      data.language.toUpperCase().slice(0, 4);
-
-    questions = data.questions ?? [];
-    renderQuestions(questions, data.savedAnswers ?? {});
-
     (document.getElementById('loading-state') as HTMLElement).style.display = 'none';
-    (document.getElementById('interview-app') as HTMLElement).style.display = '';
 
-    // If timed and already expired on load, auto-submit immediately
-    if (data.remainingSeconds !== null && data.remainingSeconds <= 0) {
-      initEditor(data.starterCode || '', data.language);
-      startAutoSave();
-      setTimeout(() => forceSubmit(), 800);
+    // Timed challenge not yet started → show confirmation dialog
+    if (data.needsStart) {
+      showPrestartOverlay(data);
       return;
     }
 
-    remainingSecondsAtLoad = data.remainingSeconds;
-    initEditor(data.starterCode || '', data.language);
-    startTimer();
-    startAutoSave();
+    launchChallenge(data);
   } catch {
     (document.getElementById('loading-state') as HTMLElement).style.display = 'none';
     (document.getElementById('error-state') as HTMLElement).style.display = 'flex';
   }
+}
+
+function showPrestartOverlay(data: ChallengeData): void {
+  const overlay = document.getElementById('prestart-overlay') as HTMLElement;
+  (document.getElementById('prestart-title') as HTMLElement).textContent = data.title;
+  (document.getElementById('prestart-meta') as HTMLElement).innerHTML =
+    `⏱ <span>${data.timeLimitMinutes} minute${data.timeLimitMinutes === 1 ? '' : 's'} time limit</span>`;
+  overlay.style.display = 'flex';
+
+  (document.getElementById('prestart-btn') as HTMLButtonElement).onclick = async () => {
+    const btn = document.getElementById('prestart-btn') as HTMLButtonElement;
+    btn.disabled = true;
+    btn.textContent = 'Starting…';
+    try {
+      const startRes = await fetch(`/api/interview/${TOKEN}/start`, { method: 'POST' });
+      if (!startRes.ok) throw new Error();
+      const { remainingSeconds } = await startRes.json() as { remainingSeconds: number };
+      overlay.style.display = 'none';
+      launchChallenge({ ...data, remainingSeconds, needsStart: false });
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Start challenge →';
+      toast('Could not start — please try again', 'err');
+    }
+  };
+}
+
+function launchChallenge(data: ChallengeData): void {
+  (document.getElementById('problem-title') as HTMLElement).textContent = data.title;
+  (document.getElementById('problem-description') as HTMLElement).innerHTML = marked.parse(data.description);
+  (document.getElementById('lang-badge') as HTMLElement).textContent =
+    data.language.toUpperCase().slice(0, 4);
+  (document.getElementById('interview-app') as HTMLElement).style.display = '';
+
+  questions = data.questions ?? [];
+  renderQuestions(questions, data.savedAnswers ?? {});
+
+  // Already expired on load → auto-submit immediately
+  if (data.remainingSeconds !== null && data.remainingSeconds <= 0) {
+    initEditor(data.starterCode || '', data.language);
+    startAutoSave();
+    setTimeout(() => forceSubmit(), 800);
+    return;
+  }
+
+  remainingSecondsAtLoad = data.remainingSeconds;
+  initEditor(data.starterCode || '', data.language);
+  startTimer();
+  startAutoSave();
 }
 
 // ─── Monaco Editor ────────────────────────────────────────────────────────────

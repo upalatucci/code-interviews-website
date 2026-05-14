@@ -43,27 +43,56 @@
         return;
       }
       document.title = data.title + " \u2014 Code Interview";
-      document.getElementById("problem-title").textContent = data.title;
-      document.getElementById("problem-description").innerHTML = marked.parse(data.description);
-      document.getElementById("lang-badge").textContent = data.language.toUpperCase().slice(0, 4);
-      questions = data.questions ?? [];
-      renderQuestions(questions, data.savedAnswers ?? {});
       document.getElementById("loading-state").style.display = "none";
-      document.getElementById("interview-app").style.display = "";
-      if (data.remainingSeconds !== null && data.remainingSeconds <= 0) {
-        initEditor(data.starterCode || "", data.language);
-        startAutoSave();
-        setTimeout(() => forceSubmit(), 800);
+      if (data.needsStart) {
+        showPrestartOverlay(data);
         return;
       }
-      remainingSecondsAtLoad = data.remainingSeconds;
-      initEditor(data.starterCode || "", data.language);
-      startTimer();
-      startAutoSave();
+      launchChallenge(data);
     } catch {
       document.getElementById("loading-state").style.display = "none";
       document.getElementById("error-state").style.display = "flex";
     }
+  }
+  function showPrestartOverlay(data) {
+    const overlay = document.getElementById("prestart-overlay");
+    document.getElementById("prestart-title").textContent = data.title;
+    document.getElementById("prestart-meta").innerHTML = `\u23F1 <span>${data.timeLimitMinutes} minute${data.timeLimitMinutes === 1 ? "" : "s"} time limit</span>`;
+    overlay.style.display = "flex";
+    document.getElementById("prestart-btn").onclick = async () => {
+      const btn = document.getElementById("prestart-btn");
+      btn.disabled = true;
+      btn.textContent = "Starting\u2026";
+      try {
+        const startRes = await fetch(`/api/interview/${TOKEN}/start`, { method: "POST" });
+        if (!startRes.ok) throw new Error();
+        const { remainingSeconds } = await startRes.json();
+        overlay.style.display = "none";
+        launchChallenge({ ...data, remainingSeconds, needsStart: false });
+      } catch {
+        btn.disabled = false;
+        btn.textContent = "Start challenge \u2192";
+        toast("Could not start \u2014 please try again", "err");
+      }
+    };
+  }
+  function launchChallenge(data) {
+    document.getElementById("problem-title").textContent = data.title;
+    document.getElementById("problem-description").innerHTML = marked.parse(data.description);
+    document.getElementById("lang-badge").textContent = data.language.toUpperCase().slice(0, 4);
+    document.getElementById("interview-app").style.display = "";
+    questions = data.questions ?? [];
+    renderQuestions(questions, data.savedAnswers ?? {});
+    if (data.remainingSeconds !== null && data.remainingSeconds <= 0) {
+      initEditor(data.starterCode || "", data.language);
+      startAutoSave();
+      setTimeout(() => forceSubmit(), 800);
+      return;
+    }
+    remainingSecondsAtLoad = data.remainingSeconds;
+    initEditor(data.starterCode || "", data.language);
+    startTimer();
+    startAutoSave();
   }
   function initEditor(code, language) {
     __require.config({ paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs" } });

@@ -404,6 +404,64 @@ tr:hover td { background: rgba(255,255,255,.02); }
   50%       { opacity: .6; }
 }
 
+/* pre-start overlay */
+.prestart-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.82);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+.prestart-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 44px 40px 36px;
+  width: min(520px, 96vw);
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  text-align: center;
+}
+.prestart-icon { font-size: 52px; margin-bottom: 16px; line-height: 1; }
+.prestart-box h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.prestart-meta {
+  font-size: 15px;
+  color: var(--yellow);
+  font-weight: 600;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.prestart-rules {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+}
+.prestart-rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.prestart-rule strong { color: var(--text); }
+.rule-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+  margin-top: 1px;
+}
+
 /* paste warning overlay */
 .paste-warning {
   position: fixed;

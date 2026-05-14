@@ -18,11 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!rows.length) return res.status(404).json({ error: 'Link not found' });
   const link = rows[0];
 
-  // Record first open time if not yet set
-  const openedAt = link.first_opened_at
-    ? new Date(link.first_opened_at)
-    : new Date();
-
+  // Record first open (for tracking purposes only — not used for timer)
   if (!link.first_opened_at) {
     await sql`UPDATE interview_links SET first_opened_at = NOW() WHERE token = ${token}`;
   }
@@ -40,10 +36,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try { savedAnswers = JSON.parse((saves[0] as { answers?: string }).answers ?? '{}') as Record<number, string>; } catch { /* noop */ }
   }
 
-  // Compute remaining seconds for timed challenges
+  // Timer logic: use started_at as origin (set when candidate confirms start)
   let remainingSeconds: number | null = null;
-  if (link.time_limit_minutes) {
-    const elapsedMs = Date.now() - openedAt.getTime();
+  const needsStart = !!link.time_limit_minutes && !link.started_at && !link.submitted_at;
+
+  if (link.time_limit_minutes && link.started_at) {
+    const elapsedMs = Date.now() - new Date(link.started_at).getTime();
     remainingSeconds = Math.floor(link.time_limit_minutes * 60 - elapsedMs / 1000);
   }
 
@@ -58,5 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     savedAnswers,
     timeLimitMinutes: link.time_limit_minutes,
     remainingSeconds,
+    /** true when a timed challenge hasn't been started yet — show confirmation dialog */
+    needsStart,
   });
 }

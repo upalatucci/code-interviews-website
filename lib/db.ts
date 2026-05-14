@@ -41,6 +41,8 @@ export interface InterviewLink {
   candidate_email: string;
   created_at: string;
   first_opened_at: string | null;
+  /** Set when the candidate explicitly clicks "Start" — used as the timer origin */
+  started_at: string | null;
   submitted_at: string | null;
   // joined fields
   challenge_title?: string;
@@ -94,9 +96,12 @@ export async function ensureSchema(): Promise<void> {
       candidate_email TEXT DEFAULT '',
       created_at      TIMESTAMPTZ DEFAULT NOW(),
       first_opened_at TIMESTAMPTZ,
+      started_at      TIMESTAMPTZ,
       submitted_at    TIMESTAMPTZ
     )
   `;
+
+  await sql`ALTER TABLE interview_links ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS saves (
