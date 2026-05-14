@@ -147,6 +147,29 @@ function renderChallenges(): void {
   `).join('');
 }
 
+// ─── Markdown description preview ────────────────────────────────────────────
+
+function setDescTab(tab: 'write' | 'preview'): void {
+  const textarea = document.getElementById('c-description') as HTMLTextAreaElement;
+  const preview  = document.getElementById('c-description-preview') as HTMLElement;
+  const writeBtn = document.getElementById('desc-tab-write') as HTMLElement;
+  const prevBtn  = document.getElementById('desc-tab-preview') as HTMLElement;
+
+  if (tab === 'preview') {
+    preview.innerHTML = marked.parse(textarea.value || '*Nothing to preview yet.*');
+    textarea.style.display  = 'none';
+    preview.style.display   = '';
+    writeBtn.classList.remove('active');
+    prevBtn.classList.add('active');
+  } else {
+    textarea.style.display  = '';
+    preview.style.display   = 'none';
+    writeBtn.classList.add('active');
+    prevBtn.classList.remove('active');
+    textarea.focus();
+  }
+}
+
 // ─── Question editor helpers ──────────────────────────────────────────────────
 
 function renderQuestionEditor(qs: string[]): void {
@@ -192,6 +215,7 @@ function openChallengeModal(_id?: number): void {
   (document.getElementById('c-language') as HTMLSelectElement).value = 'javascript';
   (document.getElementById('c-time-limit') as HTMLInputElement).value = '';
   renderQuestionEditor([]);
+  setDescTab('write');
   openModal('challenge-modal');
 }
 
@@ -209,6 +233,7 @@ function editChallenge(id: number): void {
   let qs: string[] = [];
   try { qs = JSON.parse(c.questions || '[]') as string[]; } catch { /* noop */ }
   renderQuestionEditor(qs);
+  setDescTab('write');
   openModal('challenge-modal');
 }
 
@@ -565,13 +590,14 @@ declare global {
     showPage: typeof showPage;
     addQuestion: typeof addQuestion;
     removeQuestion: typeof removeQuestion;
+    setDescTab: typeof setDescTab;
   }
 }
 Object.assign(window, {
   doLogin, openChallengeModal, editChallenge, saveChallenge, deleteChallenge,
   quickLink, openLinkModal, generateLink, copyGeneratedLink, deleteLink,
   viewSubmission, previewSave, copyCode, openModal, closeModal,
-  loadSubmissions, copyText, showPage, addQuestion, removeQuestion,
+  loadSubmissions, copyText, showPage, addQuestion, removeQuestion, setDescTab,
 });
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────

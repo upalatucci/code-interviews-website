@@ -56,7 +56,7 @@ async function loadChallenge(): Promise<void> {
 
     document.title = data.title + ' — Code Interview';
     (document.getElementById('problem-title') as HTMLElement).textContent = data.title;
-    (document.getElementById('problem-description') as HTMLElement).textContent = data.description;
+    (document.getElementById('problem-description') as HTMLElement).innerHTML = marked.parse(data.description);
     (document.getElementById('lang-badge') as HTMLElement).textContent =
       data.language.toUpperCase().slice(0, 4);
 

@@ -105,6 +105,25 @@
     </div>
   `).join("");
   }
+  function setDescTab(tab) {
+    const textarea = document.getElementById("c-description");
+    const preview = document.getElementById("c-description-preview");
+    const writeBtn = document.getElementById("desc-tab-write");
+    const prevBtn = document.getElementById("desc-tab-preview");
+    if (tab === "preview") {
+      preview.innerHTML = marked.parse(textarea.value || "*Nothing to preview yet.*");
+      textarea.style.display = "none";
+      preview.style.display = "";
+      writeBtn.classList.remove("active");
+      prevBtn.classList.add("active");
+    } else {
+      textarea.style.display = "";
+      preview.style.display = "none";
+      writeBtn.classList.add("active");
+      prevBtn.classList.remove("active");
+      textarea.focus();
+    }
+  }
   function renderQuestionEditor(qs) {
     const container = document.getElementById("questions-editor");
     container.innerHTML = qs.map((q, i) => `
@@ -138,6 +157,7 @@
     document.getElementById("c-language").value = "javascript";
     document.getElementById("c-time-limit").value = "";
     renderQuestionEditor([]);
+    setDescTab("write");
     openModal("challenge-modal");
   }
   function editChallenge(id) {
@@ -156,6 +176,7 @@
     } catch {
     }
     renderQuestionEditor(qs);
+    setDescTab("write");
     openModal("challenge-modal");
   }
   async function saveChallenge() {
@@ -512,7 +533,8 @@
     copyText,
     showPage,
     addQuestion,
-    removeQuestion
+    removeQuestion,
+    setDescTab
   });
   var saved = localStorage.getItem("adminKey");
   if (saved) {

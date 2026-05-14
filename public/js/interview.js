@@ -44,7 +44,7 @@
       }
       document.title = data.title + " \u2014 Code Interview";
       document.getElementById("problem-title").textContent = data.title;
-      document.getElementById("problem-description").textContent = data.description;
+      document.getElementById("problem-description").innerHTML = marked.parse(data.description);
       document.getElementById("lang-badge").textContent = data.language.toUpperCase().slice(0, 4);
       questions = data.questions ?? [];
       renderQuestions(questions, data.savedAnswers ?? {});
