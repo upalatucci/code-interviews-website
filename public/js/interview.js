@@ -68,7 +68,7 @@
         if (!startRes.ok) throw new Error();
         const { remainingSeconds } = await startRes.json();
         overlay.style.display = "none";
-        launchChallenge({ ...data, remainingSeconds, needsStart: false });
+        await launchChallenge({ ...data, remainingSeconds, needsStart: false });
       } catch {
         btn.disabled = false;
         btn.textContent = "Start challenge \u2192";
@@ -76,9 +76,9 @@
       }
     };
   }
-  function launchChallenge(data) {
+  async function launchChallenge(data) {
     document.getElementById("problem-title").textContent = data.title;
-    document.getElementById("problem-description").innerHTML = marked.parse(data.description);
+    document.getElementById("problem-description").innerHTML = await Promise.resolve(marked.parse(data.description));
     document.getElementById("lang-badge").textContent = data.language.toUpperCase().slice(0, 4);
     document.getElementById("interview-app").style.display = "";
     questions = data.questions ?? [];

@@ -105,15 +105,18 @@
     </div>
   `).join("");
   }
-  function setDescTab(tab) {
+  async function renderMd(src) {
+    return Promise.resolve(marked.parse(src));
+  }
+  async function setDescTab(tab) {
     const textarea = document.getElementById("c-description");
     const preview = document.getElementById("c-description-preview");
     const writeBtn = document.getElementById("desc-tab-write");
     const prevBtn = document.getElementById("desc-tab-preview");
     if (tab === "preview") {
-      preview.innerHTML = marked.parse(textarea.value || "*Nothing to preview yet.*");
+      preview.innerHTML = await renderMd(textarea.value || "*Nothing to preview yet.*");
       textarea.style.display = "none";
-      preview.style.display = "";
+      preview.style.display = "block";
       writeBtn.classList.remove("active");
       prevBtn.classList.add("active");
     } else {

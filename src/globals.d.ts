@@ -6,8 +6,8 @@ declare namespace require {
   function config(opts: { paths: Record<string, string> }): void;
 }
 
-// marked is loaded from CDN
+// marked is loaded from CDN (marked@9 — synchronous by default)
 declare const marked: {
-  parse(src: string, options?: Record<string, unknown>): string;
-  setOptions(options: Record<string, unknown>): void;
+  parse(src: string, options?: Record<string, unknown>): string | Promise<string>;
+  use(options: Record<string, unknown>): void;
 };

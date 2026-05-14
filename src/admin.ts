@@ -147,18 +147,25 @@ function renderChallenges(): void {
   `).join('');
 }
 
+// ─── Markdown helpers ─────────────────────────────────────────────────────────
+
+/** Always resolves to an HTML string regardless of marked version */
+async function renderMd(src: string): Promise<string> {
+  return Promise.resolve(marked.parse(src));
+}
+
 // ─── Markdown description preview ────────────────────────────────────────────
 
-function setDescTab(tab: 'write' | 'preview'): void {
+async function setDescTab(tab: 'write' | 'preview'): Promise<void> {
   const textarea = document.getElementById('c-description') as HTMLTextAreaElement;
   const preview  = document.getElementById('c-description-preview') as HTMLElement;
   const writeBtn = document.getElementById('desc-tab-write') as HTMLElement;
   const prevBtn  = document.getElementById('desc-tab-preview') as HTMLElement;
 
   if (tab === 'preview') {
-    preview.innerHTML = marked.parse(textarea.value || '*Nothing to preview yet.*');
+    preview.innerHTML = await renderMd(textarea.value || '*Nothing to preview yet.*');
     textarea.style.display  = 'none';
-    preview.style.display   = '';
+    preview.style.display   = 'block';
     writeBtn.classList.remove('active');
     prevBtn.classList.add('active');
   } else {

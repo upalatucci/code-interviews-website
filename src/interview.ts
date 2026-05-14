@@ -88,7 +88,7 @@ function showPrestartOverlay(data: ChallengeData): void {
       if (!startRes.ok) throw new Error();
       const { remainingSeconds } = await startRes.json() as { remainingSeconds: number };
       overlay.style.display = 'none';
-      launchChallenge({ ...data, remainingSeconds, needsStart: false });
+      await launchChallenge({ ...data, remainingSeconds, needsStart: false });
     } catch {
       btn.disabled = false;
       btn.textContent = 'Start challenge →';
@@ -97,9 +97,10 @@ function showPrestartOverlay(data: ChallengeData): void {
   };
 }
 
-function launchChallenge(data: ChallengeData): void {
+async function launchChallenge(data: ChallengeData): Promise<void> {
   (document.getElementById('problem-title') as HTMLElement).textContent = data.title;
-  (document.getElementById('problem-description') as HTMLElement).innerHTML = marked.parse(data.description);
+  (document.getElementById('problem-description') as HTMLElement).innerHTML =
+    await Promise.resolve(marked.parse(data.description));
   (document.getElementById('lang-badge') as HTMLElement).textContent =
     data.language.toUpperCase().slice(0, 4);
   (document.getElementById('interview-app') as HTMLElement).style.display = '';
