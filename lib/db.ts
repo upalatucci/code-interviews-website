@@ -135,8 +135,9 @@ export async function ensureSchema(): Promise<void> {
 
   // Migrations for existing installs
   await sql`ALTER TABLE interview_links ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ`;
-  await sql`ALTER TABLE saves ADD COLUMN IF NOT EXISTS codes   TEXT NOT NULL DEFAULT '{}'`;
-  await sql`ALTER TABLE saves ADD COLUMN IF NOT EXISTS answers TEXT NOT NULL DEFAULT '{}'`;
+  await sql`ALTER TABLE saves ADD COLUMN IF NOT EXISTS codes    TEXT    NOT NULL DEFAULT '{}'`;
+  await sql`ALTER TABLE saves ADD COLUMN IF NOT EXISTS answers  TEXT    NOT NULL DEFAULT '{}'`;
+  await sql`ALTER TABLE saves ADD COLUMN IF NOT EXISTS is_final BOOLEAN NOT NULL DEFAULT FALSE`;
 
   schemaReady = true;
 }

@@ -198,10 +198,15 @@
       </div>
       <div class="cc-body">
         <div class="form-group">
-          <label style="display:flex;align-items:center;justify-content:space-between">
-            Description <span style="color:var(--accent2);font-size:11px;font-weight:600">Markdown</span>
-          </label>
-          <textarea class="cc-desc" rows="5" placeholder="Describe the problem using **Markdown**.">${esc(cc.description ?? "")}</textarea>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <label style="margin:0">Description <span style="color:var(--accent2);font-size:11px;font-weight:600">Markdown</span></label>
+            <div class="tab-bar" style="margin:0">
+              <button type="button" class="tab-btn active" id="cc-desc-write-${index}" onclick="setCcDescTab(${index},'write')">Write</button>
+              <button type="button" class="tab-btn"        id="cc-desc-prev-${index}"  onclick="setCcDescTab(${index},'preview')">Preview</button>
+            </div>
+          </div>
+          <textarea class="cc-desc" id="cc-desc-${index}" rows="5" placeholder="Describe the problem using **Markdown**.">${esc(cc.description ?? "")}</textarea>
+          <div class="markdown-preview" id="cc-desc-preview-${index}" style="display:none"></div>
         </div>
         <div class="form-group">
           <label>Starter code (optional)</label>
@@ -242,6 +247,26 @@
     const open = body.style.display !== "none";
     body.style.display = open ? "none" : "";
     btn.textContent = open ? "\u25B8" : "\u25BE";
+  }
+  async function setCcDescTab(index, tab) {
+    const ta = document.getElementById(`cc-desc-${index}`);
+    const pre = document.getElementById(`cc-desc-preview-${index}`);
+    const wb = document.getElementById(`cc-desc-write-${index}`);
+    const pb = document.getElementById(`cc-desc-prev-${index}`);
+    if (!ta || !pre || !wb || !pb) return;
+    if (tab === "preview") {
+      pre.innerHTML = await renderMd(ta.value || "*Nothing to preview yet.*");
+      ta.style.display = "none";
+      pre.style.display = "block";
+      wb.classList.remove("active");
+      pb.classList.add("active");
+    } else {
+      ta.style.display = "";
+      pre.style.display = "none";
+      wb.classList.add("active");
+      pb.classList.remove("active");
+      ta.focus();
+    }
   }
   function getCodingChallenges() {
     const container = document.getElementById("coding-challenges-editor");
@@ -487,10 +512,13 @@
       container.innerHTML = "";
       return;
     }
+    _codeViewerCcs = ccs;
+    _codeViewerCodesMap = {};
     let codesMap = {};
     if (save) {
       try {
         codesMap = JSON.parse(save.codes || "{}");
+        _codeViewerCodesMap = codesMap;
       } catch {
       }
     }
@@ -661,6 +689,7 @@
     addCodingChallenge,
     removeCodingChallenge,
     toggleCc,
+    setCcDescTab,
     addInterviewQuestion,
     removeInterviewQuestion,
     renderMd

@@ -1,0 +1,13 @@
+- generic [active] [ref=e1]:
+  - paragraph [ref=e4]: Loading interview…
+  - generic:
+    - generic: ⛔ Paste is disabled for this interview
+  - generic:
+    - generic:
+      - generic:
+        - heading "Submit your solution?" [level=3]
+        - button "×"
+      - paragraph: Once submitted you can no longer edit. Make sure you're done with all challenges and questions!
+      - generic:
+        - button "Keep editing"
+        - button "Yes, submit"

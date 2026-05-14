@@ -1,0 +1,89 @@
+- generic [ref=e1]:
+  - generic [ref=e20]:
+    - complementary [ref=e21]:
+      - generic [ref=e23]:
+        - img [ref=e24]
+        - generic [ref=e29]:
+          - generic [ref=e30]: Red Hat
+          - generic [ref=e31]: Interview Platform
+      - navigation [ref=e32]:
+        - link "📋 Interviews" [ref=e33] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e34]: 📋
+          - text: Interviews
+        - link "🔗 Links" [ref=e35] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e36]: 🔗
+          - text: Links
+        - link "📝 Submissions" [ref=e37] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e38]: 📝
+          - text: Submissions
+      - generic [ref=e39]: "Key: chan****"
+    - main [ref=e40]:
+      - generic [ref=e42]:
+        - heading "Interviews" [level=2] [ref=e43]
+        - button "+ New Interview" [ref=e44] [cursor=pointer]
+  - generic [ref=e46]:
+    - generic [ref=e47]:
+      - heading "New Interview" [level=3] [ref=e48]
+      - button "×" [ref=e49] [cursor=pointer]
+    - generic [ref=e50]:
+      - generic [ref=e51]:
+        - generic [ref=e52]: Interview title
+        - textbox "e.g. Senior Backend Engineer Interview" [ref=e53]
+      - generic [ref=e54]:
+        - generic [ref=e55]: Time limit (minutes, optional)
+        - spinbutton [ref=e56]
+    - generic [ref=e57]:
+      - heading "Coding Challenges description supports Markdown" [level=4] [ref=e58]
+      - button "+ Add challenge" [ref=e59] [cursor=pointer]
+    - generic [ref=e67]:
+      - generic [ref=e68]:
+        - generic [ref=e69]: Challenge 1
+        - textbox "Challenge title" [ref=e70]
+        - combobox [ref=e71]:
+          - option "javascript" [selected]
+          - option "typescript"
+          - option "python"
+          - option "java"
+          - option "cpp"
+          - option "go"
+          - option "rust"
+        - button "×" [ref=e72]
+        - button "▾" [ref=e73] [cursor=pointer]
+      - generic [ref=e74]:
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - text: Description
+            - generic [ref=e77]: Markdown
+          - textbox "Describe the problem using **Markdown**." [ref=e78]
+        - generic [ref=e79]:
+          - generic [ref=e80]: Starter code (optional)
+          - textbox "// starter code..." [ref=e81]
+    - generic [ref=e60]:
+      - heading "Questions plain text — candidate answers in a textarea" [level=4] [ref=e61]
+      - button "+ Add question" [active] [ref=e62] [cursor=pointer]
+    - generic [ref=e83]:
+      - textbox "e.g. What is the time complexity of your solution?" [ref=e84]
+      - button "×" [ref=e85] [cursor=pointer]
+    - generic [ref=e63]:
+      - button "Cancel" [ref=e64] [cursor=pointer]
+      - button "Save Interview" [ref=e65] [cursor=pointer]
+  - generic:
+    - generic:
+      - generic:
+        - heading "Generate Interview Link" [level=3]
+        - button "×"
+      - generic:
+        - generic: Interview
+        - combobox
+      - generic:
+        - generic:
+          - generic: Candidate name
+          - textbox "Jane Doe"
+        - generic:
+          - generic: Email (optional)
+          - textbox "jane@example.com"
+      - button "Generate Link"
+  - generic: Request failed

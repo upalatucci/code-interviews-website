@@ -249,10 +249,15 @@ function buildCcHtml(cc: Partial<CodingChallengeItem>, index: number): string {
       </div>
       <div class="cc-body">
         <div class="form-group">
-          <label style="display:flex;align-items:center;justify-content:space-between">
-            Description <span style="color:var(--accent2);font-size:11px;font-weight:600">Markdown</span>
-          </label>
-          <textarea class="cc-desc" rows="5" placeholder="Describe the problem using **Markdown**.">${esc(cc.description ?? '')}</textarea>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <label style="margin:0">Description <span style="color:var(--accent2);font-size:11px;font-weight:600">Markdown</span></label>
+            <div class="tab-bar" style="margin:0">
+              <button type="button" class="tab-btn active" id="cc-desc-write-${index}" onclick="setCcDescTab(${index},'write')">Write</button>
+              <button type="button" class="tab-btn"        id="cc-desc-prev-${index}"  onclick="setCcDescTab(${index},'preview')">Preview</button>
+            </div>
+          </div>
+          <textarea class="cc-desc" id="cc-desc-${index}" rows="5" placeholder="Describe the problem using **Markdown**.">${esc(cc.description ?? '')}</textarea>
+          <div class="markdown-preview" id="cc-desc-preview-${index}" style="display:none"></div>
         </div>
         <div class="form-group">
           <label>Starter code (optional)</label>
@@ -297,6 +302,28 @@ function toggleCc(index: number): void {
   const open = body.style.display !== 'none';
   body.style.display = open ? 'none' : '';
   btn.textContent = open ? '▸' : '▾';
+}
+
+async function setCcDescTab(index: number, tab: 'write' | 'preview'): Promise<void> {
+  const ta  = document.getElementById(`cc-desc-${index}`) as HTMLTextAreaElement | null;
+  const pre = document.getElementById(`cc-desc-preview-${index}`) as HTMLElement | null;
+  const wb  = document.getElementById(`cc-desc-write-${index}`) as HTMLElement | null;
+  const pb  = document.getElementById(`cc-desc-prev-${index}`) as HTMLElement | null;
+  if (!ta || !pre || !wb || !pb) return;
+
+  if (tab === 'preview') {
+    pre.innerHTML = await renderMd(ta.value || '*Nothing to preview yet.*');
+    ta.style.display  = 'none';
+    pre.style.display = 'block';
+    wb.classList.remove('active');
+    pb.classList.add('active');
+  } else {
+    ta.style.display  = '';
+    pre.style.display = 'none';
+    wb.classList.add('active');
+    pb.classList.remove('active');
+    ta.focus();
+  }
 }
 
 function getCodingChallenges(): CodingChallengeItem[] {
@@ -550,9 +577,16 @@ function renderCodeViewers(ccs: CodingChallengeItem[], save: Save | undefined): 
   const container = document.getElementById('code-viewers') as HTMLElement;
   if (!ccs.length) { container.innerHTML = ''; return; }
 
+  // Update module-level state so selectCodeViewerTab / copyCodeViewer stay in sync
+  _codeViewerCcs = ccs;
+  _codeViewerCodesMap = {};
+
   let codesMap: Record<number, string> = {};
   if (save) {
-    try { codesMap = JSON.parse(save.codes || '{}') as Record<number, string>; } catch { /* noop */ }
+    try {
+      codesMap = JSON.parse(save.codes || '{}') as Record<number, string>;
+      _codeViewerCodesMap = codesMap;
+    } catch { /* noop */ }
   }
 
   // Build tabs
@@ -725,6 +759,7 @@ declare global {
     addCodingChallenge: typeof addCodingChallenge;
     removeCodingChallenge: typeof removeCodingChallenge;
     toggleCc: typeof toggleCc;
+    setCcDescTab: typeof setCcDescTab;
     addInterviewQuestion: typeof addInterviewQuestion;
     removeInterviewQuestion: typeof removeInterviewQuestion;
     renderMd: typeof renderMd;
@@ -735,7 +770,7 @@ Object.assign(window, {
   quickLink, openLinkModal, generateLink, copyGeneratedLink, deleteLink,
   viewSubmission, selectSave, selectCodeViewerTab, copyCodeViewer,
   openModal, closeModal, loadSubmissions, copyText, showPage, cloneLink,
-  addCodingChallenge, removeCodingChallenge, toggleCc,
+  addCodingChallenge, removeCodingChallenge, toggleCc, setCcDescTab,
   addInterviewQuestion, removeInterviewQuestion, renderMd,
 });
 

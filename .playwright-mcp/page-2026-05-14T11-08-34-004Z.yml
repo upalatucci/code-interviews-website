@@ -1,0 +1,64 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e20]:
+    - complementary [ref=e21]:
+      - generic [ref=e23]:
+        - img [ref=e24]
+        - generic [ref=e29]:
+          - generic [ref=e30]: Red Hat
+          - generic [ref=e31]: Interview Platform
+      - navigation [ref=e32]:
+        - link "📋 Interviews" [ref=e33] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e34]: 📋
+          - text: Interviews
+        - link "🔗 Links" [ref=e35] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e36]: 🔗
+          - text: Links
+        - link "📝 Submissions" [ref=e37] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e38]: 📝
+          - text: Submissions
+      - generic [ref=e39]: "Key: chan****"
+    - main [ref=e40]:
+      - generic [ref=e42]:
+        - heading "Interviews" [level=2] [ref=e43]
+        - button "+ New Interview" [ref=e44] [cursor=pointer]
+  - generic:
+    - generic:
+      - generic:
+        - heading "New Interview" [level=3]
+        - button "×"
+      - generic:
+        - generic:
+          - generic: Interview title
+          - textbox "e.g. Senior Backend Engineer Interview"
+        - generic:
+          - generic: Time limit (minutes, optional)
+          - spinbutton
+      - generic:
+        - heading "Coding Challenges description supports Markdown" [level=4]
+        - button "+ Add challenge"
+      - generic:
+        - heading "Questions plain text — candidate answers in a textarea" [level=4]
+        - button "+ Add question"
+      - generic:
+        - button "Cancel"
+        - button "Save Interview"
+  - generic:
+    - generic:
+      - generic:
+        - heading "Generate Interview Link" [level=3]
+        - button "×"
+      - generic:
+        - generic: Interview
+        - combobox
+      - generic:
+        - generic:
+          - generic: Candidate name
+          - textbox "Jane Doe"
+        - generic:
+          - generic: Email (optional)
+          - textbox "jane@example.com"
+      - button "Generate Link"
+  - generic: Request failed
