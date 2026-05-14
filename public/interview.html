@@ -56,12 +56,27 @@
           <span class="autosave-status" id="autosave-status">Auto-save on</span>
         </div>
         <div class="toolbar-right">
+          <button id="run-btn" class="btn btn-ghost" onclick="runCode()" title="Run code (unlimited runs)">
+            ▶ Run
+          </button>
           <button id="submit-btn" class="btn btn-success" onclick="submitCode()">
-            Submit solution ↗
+            Submit ↗
           </button>
         </div>
       </div>
       <div id="editor-container"></div>
+
+      <!-- Output panel — shown after each run -->
+      <div id="run-output-panel" class="run-output-panel" style="display:none">
+        <div class="run-output-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)">Output</span>
+            <span id="run-count-badge" class="run-count-badge"></span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="clearOutput()">Clear</button>
+        </div>
+        <div id="run-output" class="run-output-content"></div>
+      </div>
     </div>
 
   </div>

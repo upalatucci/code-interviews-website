@@ -129,6 +129,7 @@
   async function showCodingChallenge(cc, savedAnswers) {
     currentView = "coding";
     currentCcId = cc.id;
+    document.getElementById("run-btn").style.display = "";
     setActiveNavTab(`[data-cc-id="${cc.id}"]`);
     document.getElementById("problem-description").innerHTML = await Promise.resolve(marked.parse(cc.description || ""));
     renderQuestionsInPanel(savedAnswers);
@@ -151,6 +152,7 @@
     setActiveNavTab('[data-view="questions"]');
     document.getElementById("problem-description").innerHTML = "";
     renderQuestionsInPanel(savedAnswers);
+    document.getElementById("run-btn").style.display = "none";
     if (codingChallenges.length === 0) {
       document.getElementById("editor-panel").style.display = "none";
       document.getElementById("interview-layout").classList.add("questions-only");
@@ -394,6 +396,114 @@
       }
     }, 1e3);
   }
+  var PISTON_API = "https://emkc.org/api/v2/piston/execute";
+  var pistonLangMap = {
+    javascript: { language: "javascript", version: "*" },
+    typescript: { language: "typescript", version: "*" },
+    python: { language: "python3", version: "*" },
+    java: { language: "java", version: "*" },
+    cpp: { language: "c++", version: "*" },
+    go: { language: "go", version: "*" },
+    rust: { language: "rust", version: "*" }
+  };
+  var runCount = 0;
+  async function runCode() {
+    if (isSubmitted) return;
+    const cc = codingChallenges.find((c) => c.id === currentCcId);
+    if (!cc) {
+      toast("Select a coding challenge to run", "err");
+      return;
+    }
+    const pistonLang = pistonLangMap[cc.language];
+    if (!pistonLang) {
+      toast(`Running ${cc.language} is not supported`, "err");
+      return;
+    }
+    const code = theEditor ? theEditor.getValue() : "";
+    if (!code.trim()) {
+      toast("Write some code first", "err");
+      return;
+    }
+    setRunning(true);
+    showOutputPanel();
+    setOutputRunning();
+    try {
+      const res = await fetch(PISTON_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          language: pistonLang.language,
+          version: pistonLang.version,
+          files: [{ content: code }]
+        })
+      });
+      if (!res.ok) throw new Error(`Code runner returned ${res.status}`);
+      const data = await res.json();
+      runCount++;
+      updateRunCountBadge();
+      displayRunOutput(data);
+    } catch (e) {
+      setOutputError(e.message);
+    } finally {
+      setRunning(false);
+    }
+  }
+  function setRunning(running) {
+    const btn = document.getElementById("run-btn");
+    btn.classList.toggle("running", running);
+    btn.textContent = running ? "\u23F3 Running\u2026" : "\u25B6 Run";
+    btn.disabled = running;
+  }
+  function showOutputPanel() {
+    const panel = document.getElementById("run-output-panel");
+    panel.style.display = "";
+  }
+  function clearOutput() {
+    document.getElementById("run-output-panel").style.display = "none";
+    document.getElementById("run-output").innerHTML = "";
+  }
+  function updateRunCountBadge() {
+    const badge = document.getElementById("run-count-badge");
+    badge.textContent = `Run ${runCount}`;
+    badge.classList.add("show");
+  }
+  function setOutputRunning() {
+    document.getElementById("run-output").innerHTML = '<div class="output-running">Running your code\u2026</div>';
+  }
+  function setOutputError(msg) {
+    document.getElementById("run-output").innerHTML = `<pre class="output-stderr">Error: ${escHtml(msg)}</pre>
+     <div class="output-exit err">\u2717 Could not execute code</div>`;
+  }
+  function displayRunOutput(data) {
+    const out = document.getElementById("run-output");
+    const parts = [];
+    if (data.compile) {
+      if (data.compile.stdout) {
+        parts.push(`<pre class="output-stdout">${escHtml(data.compile.stdout)}</pre>`);
+      }
+      if (data.compile.stderr) {
+        parts.push(`<pre class="output-stderr">${escHtml(data.compile.stderr)}</pre>`);
+      }
+      if (data.compile.code !== 0) {
+        out.innerHTML = parts.join("") + `<div class="output-exit err">\u2717 Compilation failed (exit code ${data.compile.code})</div>`;
+        return;
+      }
+    }
+    if (data.run.stdout) {
+      parts.push(`<pre class="output-stdout">${escHtml(data.run.stdout)}</pre>`);
+    }
+    if (data.run.stderr) {
+      parts.push(`<pre class="output-stderr">${escHtml(data.run.stderr)}</pre>`);
+    }
+    if (!data.run.stdout && !data.run.stderr) {
+      parts.push('<div class="output-empty">(no output)</div>');
+    }
+    const exitOk = data.run.code === 0;
+    parts.push(
+      `<div class="output-exit ${exitOk ? "ok" : "err"}">${exitOk ? "\u2713" : "\u2717"} Process exited with code ${data.run.code}</div>`
+    );
+    out.innerHTML = parts.join("");
+  }
   function escHtml(s) {
     return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
@@ -412,5 +522,5 @@
       e.returnValue = "";
     }
   });
-  Object.assign(window, { submitCode, closeConfirm, confirmSubmit, selectCodingChallenge, selectQuestionsView });
+  Object.assign(window, { submitCode, closeConfirm, confirmSubmit, selectCodingChallenge, selectQuestionsView, runCode, clearOutput });
 })();

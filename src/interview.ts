@@ -184,6 +184,9 @@ async function showCodingChallenge(cc: CodingChallengeData, savedAnswers?: Recor
   currentView = 'coding';
   currentCcId = cc.id;
 
+  // Ensure run button is visible
+  (document.getElementById('run-btn') as HTMLElement).style.display = '';
+
   setActiveNavTab(`[data-cc-id="${cc.id}"]`);
 
   // Update description
@@ -221,6 +224,9 @@ function showQuestionsView(savedAnswers?: Record<number, string>): void {
 
   (document.getElementById('problem-description') as HTMLElement).innerHTML = '';
   renderQuestionsInPanel(savedAnswers);
+
+  // Hide run button when on questions view
+  (document.getElementById('run-btn') as HTMLElement).style.display = 'none';
 
   // Hide editor panel when only showing questions
   if (codingChallenges.length === 0) {
@@ -492,6 +498,142 @@ function startTimer(): void {
   }, 1000);
 }
 
+// ─── Run code (Piston API) ────────────────────────────────────────────────────
+
+const PISTON_API = 'https://emkc.org/api/v2/piston/execute';
+
+const pistonLangMap: Record<string, { language: string; version: string }> = {
+  javascript: { language: 'javascript', version: '*' },
+  typescript: { language: 'typescript', version: '*' },
+  python:     { language: 'python3',    version: '*' },
+  java:       { language: 'java',       version: '*' },
+  cpp:        { language: 'c++',        version: '*' },
+  go:         { language: 'go',         version: '*' },
+  rust:       { language: 'rust',       version: '*' },
+};
+
+let runCount = 0;
+
+async function runCode(): Promise<void> {
+  if (isSubmitted) return;
+
+  const cc = codingChallenges.find(c => c.id === currentCcId);
+  if (!cc) { toast('Select a coding challenge to run', 'err'); return; }
+
+  const pistonLang = pistonLangMap[cc.language];
+  if (!pistonLang) { toast(`Running ${cc.language} is not supported`, 'err'); return; }
+
+  const code = theEditor ? theEditor.getValue() : '';
+  if (!code.trim()) { toast('Write some code first', 'err'); return; }
+
+  setRunning(true);
+  showOutputPanel();
+  setOutputRunning();
+
+  try {
+    const res = await fetch(PISTON_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        language: pistonLang.language,
+        version: pistonLang.version,
+        files: [{ content: code }],
+      }),
+    });
+
+    if (!res.ok) throw new Error(`Code runner returned ${res.status}`);
+    const data = await res.json() as {
+      run: { stdout: string; stderr: string; output: string; code: number };
+      compile?: { stdout: string; stderr: string; code: number };
+    };
+
+    runCount++;
+    updateRunCountBadge();
+    displayRunOutput(data);
+  } catch (e) {
+    setOutputError((e as Error).message);
+  } finally {
+    setRunning(false);
+  }
+}
+
+function setRunning(running: boolean): void {
+  const btn = document.getElementById('run-btn') as HTMLButtonElement;
+  btn.classList.toggle('running', running);
+  btn.textContent = running ? '⏳ Running…' : '▶ Run';
+  btn.disabled = running;
+}
+
+function showOutputPanel(): void {
+  const panel = document.getElementById('run-output-panel') as HTMLElement;
+  panel.style.display = '';
+}
+
+function clearOutput(): void {
+  (document.getElementById('run-output-panel') as HTMLElement).style.display = 'none';
+  (document.getElementById('run-output') as HTMLElement).innerHTML = '';
+}
+
+function updateRunCountBadge(): void {
+  const badge = document.getElementById('run-count-badge') as HTMLElement;
+  badge.textContent = `Run ${runCount}`;
+  badge.classList.add('show');
+}
+
+function setOutputRunning(): void {
+  (document.getElementById('run-output') as HTMLElement).innerHTML =
+    '<div class="output-running">Running your code…</div>';
+}
+
+function setOutputError(msg: string): void {
+  (document.getElementById('run-output') as HTMLElement).innerHTML =
+    `<pre class="output-stderr">Error: ${escHtml(msg)}</pre>
+     <div class="output-exit err">✗ Could not execute code</div>`;
+}
+
+function displayRunOutput(data: {
+  run: { stdout: string; stderr: string; code: number };
+  compile?: { stdout: string; stderr: string; code: number };
+}): void {
+  const out = document.getElementById('run-output') as HTMLElement;
+  const parts: string[] = [];
+
+  // Show compiler errors/output first (for Java, C++, Rust, TypeScript)
+  if (data.compile) {
+    if (data.compile.stdout) {
+      parts.push(`<pre class="output-stdout">${escHtml(data.compile.stdout)}</pre>`);
+    }
+    if (data.compile.stderr) {
+      parts.push(`<pre class="output-stderr">${escHtml(data.compile.stderr)}</pre>`);
+    }
+    if (data.compile.code !== 0) {
+      out.innerHTML = parts.join('') +
+        `<div class="output-exit err">✗ Compilation failed (exit code ${data.compile.code})</div>`;
+      return;
+    }
+  }
+
+  // Runtime output
+  if (data.run.stdout) {
+    parts.push(`<pre class="output-stdout">${escHtml(data.run.stdout)}</pre>`);
+  }
+  if (data.run.stderr) {
+    parts.push(`<pre class="output-stderr">${escHtml(data.run.stderr)}</pre>`);
+  }
+  if (!data.run.stdout && !data.run.stderr) {
+    parts.push('<div class="output-empty">(no output)</div>');
+  }
+
+  const exitOk = data.run.code === 0;
+  parts.push(
+    `<div class="output-exit ${exitOk ? 'ok' : 'err'}">` +
+    `${exitOk ? '✓' : '✗'} Process exited with code ${data.run.code}` +
+    `</div>`
+  );
+
+  out.innerHTML = parts.join('');
+}
+
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 function escHtml(s: string): string {
@@ -518,6 +660,8 @@ declare global {
     confirmSubmit: typeof confirmSubmit;
     selectCodingChallenge: typeof selectCodingChallenge;
     selectQuestionsView: typeof selectQuestionsView;
+    runCode: typeof runCode;
+    clearOutput: typeof clearOutput;
   }
 }
-Object.assign(window, { submitCode, closeConfirm, confirmSubmit, selectCodingChallenge, selectQuestionsView });
+Object.assign(window, { submitCode, closeConfirm, confirmSubmit, selectCodingChallenge, selectQuestionsView, runCode, clearOutput });
