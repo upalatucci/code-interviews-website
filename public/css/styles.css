@@ -2,22 +2,30 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0f1117;
-  --surface: #1a1d27;
-  --surface2: #22263a;
-  --border: #2e3350;
-  --accent: #6c63ff;
-  --accent-hover: #5a52e0;
-  --accent2: #00d2ff;
-  --green: #22c55e;
-  --red: #ef4444;
-  --yellow: #f59e0b;
-  --text: #e2e8f0;
-  --text-muted: #8892a4;
-  --font: 'Inter', system-ui, sans-serif;
-  --mono: 'JetBrains Mono', 'Fira Code', monospace;
-  --radius: 8px;
-  --shadow: 0 4px 24px rgba(0,0,0,.4);
+  /* Red Hat dark palette */
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #242424;
+  --border: #333333;
+
+  /* Red Hat brand colors */
+  --accent: #ee0000;
+  --accent-hover: #c40000;
+  --accent2: #f0ab00;   /* Red Hat gold for secondary highlights */
+  --rh-red: #ee0000;
+  --rh-dark-red: #a30000;
+
+  --green: #3e8635;
+  --red: #ee0000;
+  --yellow: #f0ab00;
+  --text: #e8e8e8;
+  --text-muted: #8a8d90;
+
+  --font: 'Red Hat Text', 'Red Hat Display', system-ui, sans-serif;
+  --font-display: 'Red Hat Display', 'Red Hat Text', system-ui, sans-serif;
+  --mono: 'Red Hat Mono', 'JetBrains Mono', 'Fira Code', monospace;
+  --radius: 6px;
+  --shadow: 0 4px 24px rgba(0,0,0,.5);
 }
 
 body {
@@ -30,6 +38,58 @@ body {
 
 a { color: var(--accent2); text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+h1, h2, h3, h4 { font-family: var(--font-display); }
+
+/* ─── Red Hat logo ─────────────────────────────────────────────────── */
+.rh-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rh-logo-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+}
+.rh-wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  letter-spacing: -.2px;
+  line-height: 1.1;
+}
+.rh-product-name {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: .2px;
+  line-height: 1.2;
+}
+.rh-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* Interview page header logo */
+.interview-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.interview-logo .rh-logo-icon { width: 22px; height: 22px; }
+.interview-logo .rh-wordmark  { font-size: 12px; }
+.interview-logo .rh-divider   { height: 16px; margin: 0 2px; }
+.interview-logo .product-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
 
 /* ─── Scrollbar ────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -185,6 +245,16 @@ label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom
 }
 .sidebar-logo h1 { font-size: 15px; font-weight: 700; color: var(--text); }
 .sidebar-logo span { font-size: 11px; color: var(--text-muted); }
+
+/* Red Hat accent stripe at top of sidebar */
+.sidebar::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: var(--rh-red);
+  width: 100%;
+  margin-bottom: 24px;
+}
 .sidebar nav a {
   display: flex;
   align-items: center;
@@ -316,6 +386,7 @@ tr:hover td { background: rgba(255,255,255,.02); }
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-top: 3px solid var(--rh-red);
 }
 
 .problem-header {

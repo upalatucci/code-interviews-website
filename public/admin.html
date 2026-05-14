@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Code Interviews — Admin</title>
+  <title>Red Hat Interview Platform — Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700;900&family=Red+Hat+Text:wght@400;500;600;700&family=Red+Hat+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="/css/styles.css">
   <style>
     .copy-link { font-family: var(--mono); font-size: 11px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -37,6 +37,18 @@
 <!-- Auth screen -->
 <div id="auth-screen">
   <div class="auth-box">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px">
+      <svg style="width:36px;height:36px" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="16" cy="24" rx="13" ry="4" fill="#ee0000"/>
+        <path d="M8 24 C8 24 8.5 11 16 11 C23.5 11 24 24 24 24 Z" fill="#ee0000"/>
+        <path d="M9 19.5 C9 19.5 10 15 16 15 C22 15 23 19.5 23 19.5 Z" fill="#a30000"/>
+        <ellipse cx="16" cy="24" rx="9" ry="2.5" fill="#a30000" opacity=".6"/>
+      </svg>
+      <div style="text-align:left">
+        <div style="font-family:var(--font-display);font-weight:700;font-size:17px;line-height:1.1">Red Hat</div>
+        <div style="font-size:11px;color:var(--text-muted)">Interview Platform</div>
+      </div>
+    </div>
     <h2>Admin Login</h2>
     <p>Enter your admin key to continue</p>
     <div class="form-group">
@@ -52,8 +64,19 @@
   <div class="admin-layout">
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <h1>&#9679; Code Interviews</h1>
-        <span>Admin Panel</span>
+        <div class="rh-logo">
+          <svg class="rh-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Red Hat">
+            <!-- Shadowman hat -->
+            <ellipse cx="16" cy="24" rx="13" ry="4" fill="#ee0000"/>
+            <path d="M8 24 C8 24 8.5 11 16 11 C23.5 11 24 24 24 24 Z" fill="#ee0000"/>
+            <path d="M9 19.5 C9 19.5 10 15 16 15 C22 15 23 19.5 23 19.5 Z" fill="#a30000"/>
+            <ellipse cx="16" cy="24" rx="9" ry="2.5" fill="#a30000" opacity=".6"/>
+          </svg>
+          <div>
+            <div class="rh-wordmark">Red Hat</div>
+            <div class="rh-product-name">Interview Platform</div>
+          </div>
+        </div>
       </div>
       <nav>
         <a href="#" class="active" data-page="challenges">
