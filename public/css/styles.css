@@ -375,9 +375,64 @@ tr:hover td { background: rgba(255,255,255,.02); }
 /* ─── INTERVIEW PAGE ───────────────────────────────────────────────── */
 .interview-layout {
   display: grid;
-  grid-template-columns: 380px 1fr;
+  grid-template-columns: 420px 1fr;
   height: 100vh;
   overflow: hidden;
+}
+.interview-layout.questions-only {
+  grid-template-columns: 1fr;
+}
+.interview-layout.questions-only .editor-panel {
+  display: none;
+}
+
+/* ─── Challenge navigation ─────────────────────────────────────────── */
+.challenge-nav {
+  display: flex;
+  gap: 2px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.challenge-nav::-webkit-scrollbar { height: 3px; }
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.nav-tab:hover { color: var(--text); background: var(--surface2); }
+.nav-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.nav-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px; height: 16px;
+  background: rgba(255,255,255,.2);
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+}
+.nav-tab.active .nav-num { background: rgba(255,255,255,.3); }
+.nav-badge {
+  background: rgba(255,255,255,.15);
+  border-radius: 99px;
+  font-size: 10px;
+  padding: 1px 5px;
+  font-weight: 700;
 }
 
 .problem-panel {

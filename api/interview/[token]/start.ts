@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { token } = req.query as { token: string };
 
   const result = await sql`
-    SELECT id, submitted_at, started_at, time_limit_minutes
+    SELECT il.id, il.submitted_at, il.started_at, c.time_limit_minutes
     FROM interview_links il
     JOIN challenges c ON c.id = il.challenge_id
     WHERE il.token = ${token}
@@ -21,7 +21,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const link = rows[0];
   if (link.submitted_at) return res.status(403).json({ error: 'Already submitted' });
 
-  // Only set started_at on the very first start (idempotent)
   if (!link.started_at) {
     await sql`UPDATE interview_links SET started_at = NOW() WHERE id = ${link.id}`;
   }
@@ -29,8 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const startedAt = link.started_at ? new Date(link.started_at) : new Date();
   let remainingSeconds: number | null = null;
   if (link.time_limit_minutes) {
-    const elapsedMs = Date.now() - startedAt.getTime();
-    remainingSeconds = Math.floor(link.time_limit_minutes * 60 - elapsedMs / 1000);
+    remainingSeconds = Math.floor(link.time_limit_minutes * 60 - (Date.now() - startedAt.getTime()) / 1000);
   }
 
   return res.json({ ok: true, remainingSeconds });

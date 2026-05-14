@@ -8,28 +8,23 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700;900&family=Red+Hat+Text:wght@400;500;600;700&family=Red+Hat+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="/css/styles.css">
   <style>
-    .copy-link { font-family: var(--mono); font-size: 11px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .empty-state { text-align: center; padding: 48px; color: var(--text-muted); font-size: 14px; }
-    .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
-    .tab-bar { display: flex; gap: 4px; margin-bottom: 20px; background: var(--surface2); border-radius: 8px; padding: 4px; width: fit-content; }
-    .tab-btn { padding: 6px 16px; border-radius: 6px; border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-family: var(--font); cursor: pointer; transition: all .15s; }
-    .tab-btn.active { background: var(--accent); color: #fff; }
-    #link-token { font-family: var(--mono); font-size: 13px; word-break: break-all; background: var(--surface2); border: 1px solid var(--green); border-radius: 6px; padding: 10px 14px; margin-top: 8px; display: none; }
-    .challenge-list { display: flex; flex-direction: column; gap: 10px; }
-    .challenge-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px 18px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-    }
-    .challenge-info h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-    .challenge-info p  { font-size: 12px; color: var(--text-muted); }
-    .challenge-actions { display: flex; gap: 8px; flex-shrink: 0; }
-    .no-wrap { white-space: nowrap; }
+    .copy-link { font-family:var(--mono);font-size:11px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
+    .empty-state { text-align:center;padding:48px;color:var(--text-muted);font-size:14px }
+    .empty-state .icon { font-size:36px;margin-bottom:10px }
+    #link-token { font-family:var(--mono);font-size:13px;word-break:break-all;background:var(--surface2);border:1px solid var(--green);border-radius:6px;padding:10px 14px;margin-top:8px;display:none }
+    /* Coding challenge editor */
+    .cc-item { border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden }
+    .cc-header { display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);flex-wrap:wrap }
+    .cc-label { font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0 }
+    .cc-title { flex:1;min-width:120px }
+    .cc-lang { width:130px;flex-shrink:0 }
+    .cc-toggle { background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:4px;padding:4px 8px;cursor:pointer;flex-shrink:0 }
+    .cc-toggle:hover { color:var(--text) }
+    .cc-body { padding:14px }
+    .code-viewer-panel.hidden { display:none }
+    .challenge-section-header { display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px }
+    .challenge-section-header h4 { font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted) }
+    .challenge-section-header small { font-size:11px;color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0 }
   </style>
 </head>
 <body>
@@ -51,7 +46,7 @@
     </div>
     <h2>Admin Login</h2>
     <p>Enter your admin key to continue</p>
-    <div class="form-group">
+    <div class="form-group" style="margin-top:20px">
       <label for="admin-key-input">Admin Key</label>
       <input type="password" id="admin-key-input" placeholder="Enter key…" />
     </div>
@@ -59,14 +54,13 @@
   </div>
 </div>
 
-<!-- Main layout (hidden until authed) -->
+<!-- Main layout -->
 <div id="app" style="display:none">
   <div class="admin-layout">
     <aside class="sidebar">
       <div class="sidebar-logo">
         <div class="rh-logo">
-          <svg class="rh-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Red Hat">
-            <!-- Shadowman hat -->
+          <svg class="rh-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <ellipse cx="16" cy="24" rx="13" ry="4" fill="#ee0000"/>
             <path d="M8 24 C8 24 8.5 11 16 11 C23.5 11 24 24 24 24 Z" fill="#ee0000"/>
             <path d="M9 19.5 C9 19.5 10 15 16 15 C22 15 23 19.5 23 19.5 Z" fill="#a30000"/>
@@ -79,56 +73,39 @@
         </div>
       </div>
       <nav>
-        <a href="#" class="active" data-page="challenges">
-          <span>📋</span> Challenges
-        </a>
-        <a href="#" data-page="links">
-          <span>🔗</span> Interview Links
-        </a>
-        <a href="#" data-page="submissions">
-          <span>📝</span> Submissions
-        </a>
+        <a href="#" class="active" data-page="challenges"><span>📋</span> Interviews</a>
+        <a href="#" data-page="links"><span>🔗</span> Links</a>
+        <a href="#" data-page="submissions"><span>📝</span> Submissions</a>
       </nav>
-      <div class="sidebar-footer">
-        <span id="key-display"></span>
-      </div>
+      <div class="sidebar-footer"><span id="key-display"></span></div>
     </aside>
 
     <main class="main-content">
 
-      <!-- ── Challenges ─────────────────────────────── -->
+      <!-- ── Interviews ──────────────────────── -->
       <div id="page-challenges" class="page active">
         <div class="page-header">
-          <h2>Challenges</h2>
-          <button class="btn btn-primary" onclick="openChallengeModal()">+ New Challenge</button>
+          <h2>Interviews</h2>
+          <button class="btn btn-primary" onclick="openChallengeModal()">+ New Interview</button>
         </div>
         <div id="challenges-list" class="challenge-list"></div>
       </div>
 
-      <!-- ── Links ──────────────────────────────────── -->
+      <!-- ── Links ──────────────────────────── -->
       <div id="page-links" class="page">
         <div class="page-header">
           <h2>Interview Links</h2>
           <button class="btn btn-primary" onclick="openLinkModal()">+ Generate Link</button>
         </div>
         <div class="table-wrap">
-          <table id="links-table">
-            <thead>
-              <tr>
-                <th>Candidate</th>
-                <th>Challenge</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Link</th>
-                <th></th>
-              </tr>
-            </thead>
+          <table>
+            <thead><tr><th>Candidate</th><th>Interview</th><th>Status</th><th>Created</th><th>Link</th><th></th></tr></thead>
             <tbody id="links-tbody"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- ── Submissions ────────────────────────────── -->
+      <!-- ── Submissions ────────────────────── -->
       <div id="page-submissions" class="page">
         <div class="page-header">
           <h2>Submissions</h2>
@@ -136,22 +113,13 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Candidate</th>
-                <th>Challenge</th>
-                <th>Status</th>
-                <th>Opened</th>
-                <th>Submitted</th>
-                <th></th>
-              </tr>
-            </thead>
+            <thead><tr><th>Candidate</th><th>Interview</th><th>Status</th><th>Opened</th><th>Submitted</th><th></th></tr></thead>
             <tbody id="submissions-tbody"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- ── Submission detail ──────────────────────── -->
+      <!-- ── Submission detail ──────────────── -->
       <div id="page-submission-detail" class="page">
         <div class="page-header">
           <div style="display:flex;align-items:center;gap:12px">
@@ -162,18 +130,12 @@
         </div>
         <div id="submission-meta" class="submission-meta"></div>
         <div id="answers-block-container"></div>
-        <div style="display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start">
+        <div style="display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start">
           <div>
             <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Save History</p>
             <div id="saves-list" class="saves-list"></div>
           </div>
-          <div class="code-preview">
-            <div class="code-preview-header">
-              <span id="preview-label">Select a save to preview</span>
-              <button class="btn btn-ghost btn-sm" onclick="copyCode()">Copy</button>
-            </div>
-            <div id="preview-editor"></div>
-          </div>
+          <div id="code-viewers"></div>
         </div>
       </div>
 
@@ -181,63 +143,47 @@
   </div>
 </div>
 
-<!-- ── Challenge modal ──────────────────────────────────── -->
+<!-- ── Interview (challenge) modal ─────────────────────────── -->
 <div id="challenge-modal" class="modal-backdrop">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 id="challenge-modal-title">New Challenge</h3>
+  <div class="modal" style="max-width:780px;max-height:90vh;overflow-y:auto">
+    <div class="modal-header" style="position:sticky;top:0;background:var(--surface);z-index:10;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:20px">
+      <h3 id="challenge-modal-title">New Interview</h3>
       <button class="modal-close" onclick="closeModal('challenge-modal')">×</button>
     </div>
-    <div class="form-group">
-      <label>Title</label>
-      <input type="text" id="c-title" placeholder="e.g. Reverse a Linked List" />
-    </div>
-    <div class="form-group">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <label style="margin:0">Description <span style="color:var(--accent2);font-size:11px;font-weight:600">Markdown supported</span></label>
-        <div class="tab-bar" style="margin:0">
-          <button type="button" class="tab-btn active" id="desc-tab-write" onclick="setDescTab('write')">Write</button>
-          <button type="button" class="tab-btn" id="desc-tab-preview" onclick="setDescTab('preview')">Preview</button>
-        </div>
-      </div>
-      <textarea id="c-description" rows="8" placeholder="Describe the problem using **Markdown**.&#10;&#10;You can use headers, lists, code blocks, etc."></textarea>
-      <div id="c-description-preview" class="markdown-preview" style="display:none"></div>
-    </div>
-    <div class="form-row">
+
+    <div class="form-row" style="margin-bottom:20px">
       <div class="form-group">
-        <label>Language</label>
-        <select id="c-language">
-          <option value="javascript">JavaScript</option>
-          <option value="typescript">TypeScript</option>
-          <option value="python">Python</option>
-          <option value="java">Java</option>
-          <option value="cpp">C++</option>
-          <option value="go">Go</option>
-          <option value="rust">Rust</option>
-        </select>
+        <label>Interview title</label>
+        <input type="text" id="c-title" placeholder="e.g. Senior Backend Engineer Interview" />
       </div>
       <div class="form-group">
         <label>Time limit (minutes, optional)</label>
-        <input type="number" id="c-time-limit" min="1" max="480" placeholder="e.g. 60 — leave blank for no limit" />
+        <input type="number" id="c-time-limit" min="1" max="480" placeholder="e.g. 90 — leave blank for no limit" />
       </div>
     </div>
-    <div class="form-group">
-      <label>Starter code (optional)</label>
-      <textarea id="c-starter" rows="5" style="font-family:var(--mono);font-size:13px" placeholder="function solution() {&#10;  // your code here&#10;}"></textarea>
+
+    <!-- Coding challenges -->
+    <div class="challenge-section-header">
+      <h4>Coding Challenges <small style="margin-left:8px">description supports Markdown</small></h4>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="addCodingChallenge()">+ Add challenge</button>
     </div>
-    <div class="form-group">
-      <label>Questions (optional — shown alongside the code editor)</label>
-      <div id="questions-editor"></div>
-      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="addQuestion()">+ Add question</button>
+    <div id="coding-challenges-editor"></div>
+
+    <!-- Questions -->
+    <div class="challenge-section-header" style="margin-top:24px">
+      <h4>Questions <small style="margin-left:8px">plain text — candidate answers in a textarea</small></h4>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="addInterviewQuestion()">+ Add question</button>
     </div>
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px">
+    <div id="questions-editor"></div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:24px;position:sticky;bottom:0;background:var(--surface);padding-top:16px;border-top:1px solid var(--border)">
       <button class="btn btn-ghost" onclick="closeModal('challenge-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveChallenge()">Save</button>
+      <button class="btn btn-primary" onclick="saveChallenge()">Save Interview</button>
     </div>
   </div>
 </div>
 
-<!-- ── Link modal ──────────────────────────────────────── -->
+<!-- ── Link modal ────────────────────────────────────────── -->
 <div id="link-modal" class="modal-backdrop">
   <div class="modal">
     <div class="modal-header">
@@ -245,31 +191,23 @@
       <button class="modal-close" onclick="closeModal('link-modal')">×</button>
     </div>
     <div class="form-group">
-      <label>Challenge</label>
+      <label>Interview</label>
       <select id="l-challenge"></select>
     </div>
     <div class="form-row">
-      <div class="form-group">
-        <label>Candidate name</label>
-        <input type="text" id="l-name" placeholder="Jane Doe" />
-      </div>
-      <div class="form-group">
-        <label>Candidate email (optional)</label>
-        <input type="email" id="l-email" placeholder="jane@example.com" />
-      </div>
+      <div class="form-group"><label>Candidate name</label><input type="text" id="l-name" placeholder="Jane Doe" /></div>
+      <div class="form-group"><label>Email (optional)</label><input type="email" id="l-email" placeholder="jane@example.com" /></div>
     </div>
     <button class="btn btn-primary" style="width:100%" onclick="generateLink()">Generate Link</button>
     <div id="link-token"></div>
-    <div style="display:flex;gap:8px;margin-top:10px;display:none" id="link-actions">
+    <div style="display:none;gap:8px;margin-top:10px" id="link-actions">
       <button class="btn btn-success" style="flex:1" onclick="copyGeneratedLink()">Copy Link</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
-<!-- Monaco Editor (for preview) -->
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
 <script src="/js/admin.js"></script>

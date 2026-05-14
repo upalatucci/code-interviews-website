@@ -10,10 +10,9 @@
 </head>
 <body>
 
-<!-- Loading / error states -->
 <div id="loading-state" class="centered-state">
   <div style="width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite"></div>
-  <p>Loading challenge…</p>
+  <p>Loading interview…</p>
 </div>
 
 <div id="error-state" class="centered-state" style="display:none">
@@ -24,13 +23,13 @@
 
 <!-- Main interview layout -->
 <div id="interview-app" style="display:none">
-  <div class="interview-layout">
+  <div class="interview-layout" id="interview-layout">
 
     <!-- Problem panel -->
     <div class="problem-panel">
       <div class="problem-header">
         <div class="interview-logo">
-          <svg class="rh-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Red Hat">
+          <svg class="rh-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <ellipse cx="16" cy="24" rx="13" ry="4" fill="#ee0000"/>
             <path d="M8 24 C8 24 8.5 11 16 11 C23.5 11 24 24 24 24 Z" fill="#ee0000"/>
             <path d="M9 19.5 C9 19.5 10 15 16 15 C22 15 23 19.5 23 19.5 Z" fill="#a30000"/>
@@ -38,22 +37,25 @@
           </svg>
           <span class="rh-wordmark">Red Hat</span>
           <div class="rh-divider"></div>
-          <span class="product-label">Interview</span>
+          <span class="product-label" id="interview-title">Interview</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <span id="timer-label" style="font-size:11px;color:var(--text-muted);display:none">TIME LEFT</span>
           <div class="timer" id="timer">00:00</div>
         </div>
       </div>
-        <div class="problem-body">
-          <h2 id="problem-title"></h2>
-          <div class="problem-description prose" id="problem-description"></div>
-          <div id="questions-section"></div>
-        </div>
+
+      <!-- Challenge navigation tabs -->
+      <div class="challenge-nav" id="challenge-nav" style="display:none"></div>
+
+      <div class="problem-body">
+        <div class="problem-description prose" id="problem-description"></div>
+        <div id="questions-section"></div>
+      </div>
     </div>
 
     <!-- Editor panel -->
-    <div class="editor-panel">
+    <div class="editor-panel" id="editor-panel">
       <div class="editor-toolbar">
         <div class="toolbar-left">
           <span class="lang-badge" id="lang-badge">JS</span>
@@ -71,7 +73,7 @@
   </div>
 </div>
 
-<!-- Pre-start overlay (timed challenges only) -->
+<!-- Pre-start overlay -->
 <div id="prestart-overlay" class="prestart-overlay" style="display:none">
   <div class="prestart-box">
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px">
@@ -86,30 +88,18 @@
     <h2 id="prestart-title"></h2>
     <div class="prestart-meta" id="prestart-meta"></div>
     <div class="prestart-rules">
-      <div class="prestart-rule">
-        <span class="rule-icon">⏱</span>
-        <span>Once you click <strong>Start</strong>, the countdown begins and <strong>cannot be paused</strong>.</span>
-      </div>
-      <div class="prestart-rule">
-        <span class="rule-icon">⛔</span>
-        <span>Copy &amp; paste is disabled for the duration of the challenge.</span>
-      </div>
-      <div class="prestart-rule">
-        <span class="rule-icon">💾</span>
-        <span>Your code is auto-saved every 30 seconds. You can close and reopen the tab — the timer keeps running.</span>
-      </div>
-      <div class="prestart-rule">
-        <span class="rule-icon">✅</span>
-        <span>Submit manually when done, or your work is submitted automatically when time runs out.</span>
-      </div>
+      <div class="prestart-rule"><span class="rule-icon">⏱</span><span>Once you click <strong>Start</strong>, the countdown begins and <strong>cannot be paused</strong>.</span></div>
+      <div class="prestart-rule"><span class="rule-icon">⛔</span><span>Copy &amp; paste is disabled for the duration of the interview.</span></div>
+      <div class="prestart-rule"><span class="rule-icon">💾</span><span>Your code and answers are auto-saved every 30 seconds.</span></div>
+      <div class="prestart-rule"><span class="rule-icon">✅</span><span>Submit manually when done, or your work is submitted automatically when time runs out.</span></div>
     </div>
     <button class="btn btn-success" id="prestart-btn" style="width:100%;padding:14px;font-size:16px;margin-top:8px">
-      Start challenge →
+      Start interview →
     </button>
   </div>
 </div>
 
-<!-- Paste warning overlay -->
+<!-- Paste warning -->
 <div id="paste-warning" class="paste-warning">
   <div class="paste-warning-msg">⛔ Paste is disabled for this interview</div>
 </div>
@@ -119,7 +109,7 @@
   <div class="submitted-box">
     <div class="icon">✅</div>
     <h2>Solution submitted!</h2>
-    <p>Your code has been saved. The interviewer will review it shortly.</p>
+    <p>Your code and answers have been saved. The interviewer will review them shortly.</p>
     <p style="margin-top:12px;font-size:12px;color:var(--text-muted)">You may close this tab.</p>
   </div>
 </div>
@@ -131,7 +121,7 @@
       <h3>Submit your solution?</h3>
       <button class="modal-close" onclick="closeConfirm()">×</button>
     </div>
-    <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Once submitted you can no longer edit your code. Make sure you're done!</p>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Once submitted you can no longer edit. Make sure you're done with all challenges and questions!</p>
     <div style="display:flex;gap:10px;justify-content:flex-end">
       <button class="btn btn-ghost" onclick="closeConfirm()">Keep editing</button>
       <button class="btn btn-success" onclick="confirmSubmit()">Yes, submit</button>
@@ -141,9 +131,7 @@
 
 <div id="toast"></div>
 
-<style>
-@keyframes spin { to { transform: rotate(360deg); } }
-</style>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>

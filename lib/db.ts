@@ -6,9 +6,7 @@ let _sql: SqlFn | null = null;
 
 function getSql(): SqlFn {
   if (!_sql) {
-    if (!process.env.POSTGRES_URL) {
-      throw new Error('POSTGRES_URL environment variable is not set');
-    }
+    if (!process.env.POSTGRES_URL) throw new Error('POSTGRES_URL environment variable is not set');
     _sql = neon(process.env.POSTGRES_URL, { fullResults: true }) as unknown as SqlFn;
   }
   return _sql;
@@ -20,17 +18,31 @@ export function sql(strings: TemplateStringsArray, ...values: unknown[]): Promis
 
 // ─── Row types ────────────────────────────────────────────────────────────────
 
+/** An interview template containing multiple coding challenges + questions */
 export interface Challenge {
   id: number;
+  title: string;
+  time_limit_minutes: number | null;
+  created_at: string;
+}
+
+/** One coding problem within an interview — description is Markdown */
+export interface CodingChallenge {
+  id: number;
+  challenge_id: number;
   title: string;
   description: string;
   starter_code: string;
   language: string;
-  /** JSON string: string[] — list of open-ended questions for the candidate */
-  questions: string;
-  /** Optional time limit in minutes; NULL means no limit */
-  time_limit_minutes: number | null;
-  created_at: string;
+  position: number;
+}
+
+/** One open-ended text question within an interview — plain text */
+export interface InterviewQuestion {
+  id: number;
+  challenge_id: number;
+  text: string;
+  position: number;
 }
 
 export interface InterviewLink {
@@ -41,23 +53,17 @@ export interface InterviewLink {
   candidate_email: string;
   created_at: string;
   first_opened_at: string | null;
-  /** Set when the candidate explicitly clicks "Start" — used as the timer origin */
   started_at: string | null;
   submitted_at: string | null;
-  // joined fields
   challenge_title?: string;
-  title?: string;
-  description?: string;
-  starter_code?: string;
-  language?: string;
-  questions?: string;
 }
 
 export interface Save {
   id: number;
   link_id: number;
-  code: string;
-  /** JSON string: Record<number, string> — candidate answers keyed by question index */
+  /** JSON: Record<codingChallengeId, code> */
+  codes: string;
+  /** JSON: Record<questionId, answer> */
   answers: string;
   saved_at: string;
   is_final: boolean;
@@ -74,18 +80,33 @@ export async function ensureSchema(): Promise<void> {
     CREATE TABLE IF NOT EXISTS challenges (
       id                 SERIAL PRIMARY KEY,
       title              TEXT NOT NULL,
-      description        TEXT NOT NULL,
-      starter_code       TEXT DEFAULT '',
-      language           TEXT DEFAULT 'javascript',
-      questions          TEXT NOT NULL DEFAULT '[]',
       time_limit_minutes INTEGER DEFAULT NULL,
       created_at         TIMESTAMPTZ DEFAULT NOW()
     )
   `;
 
-  // Migrate existing tables for any new columns
-  await sql`ALTER TABLE challenges ADD COLUMN IF NOT EXISTS questions          TEXT NOT NULL DEFAULT '[]'`;
-  await sql`ALTER TABLE challenges ADD COLUMN IF NOT EXISTS time_limit_minutes INTEGER DEFAULT NULL`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS coding_challenges (
+      id           SERIAL PRIMARY KEY,
+      challenge_id INTEGER NOT NULL REFERENCES challenges(id) ON DELETE CASCADE,
+      title        TEXT NOT NULL DEFAULT '',
+      description  TEXT NOT NULL DEFAULT '',
+      starter_code TEXT DEFAULT '',
+      language     TEXT DEFAULT 'javascript',
+      position     INTEGER DEFAULT 0,
+      created_at   TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS interview_questions (
+      id           SERIAL PRIMARY KEY,
+      challenge_id INTEGER NOT NULL REFERENCES challenges(id) ON DELETE CASCADE,
+      text         TEXT NOT NULL DEFAULT '',
+      position     INTEGER DEFAULT 0,
+      created_at   TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
 
   await sql`
     CREATE TABLE IF NOT EXISTS interview_links (
@@ -101,23 +122,21 @@ export async function ensureSchema(): Promise<void> {
     )
   `;
 
-  await sql`ALTER TABLE interview_links ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ`;
-
   await sql`
     CREATE TABLE IF NOT EXISTS saves (
       id       SERIAL PRIMARY KEY,
       link_id  INTEGER NOT NULL REFERENCES interview_links(id) ON DELETE CASCADE,
-      code     TEXT NOT NULL,
+      codes    TEXT NOT NULL DEFAULT '{}',
       answers  TEXT NOT NULL DEFAULT '{}',
       saved_at TIMESTAMPTZ DEFAULT NOW(),
       is_final BOOLEAN DEFAULT FALSE
     )
   `;
 
-  // Migrate existing table if the answers column is missing
-  await sql`
-    ALTER TABLE saves ADD COLUMN IF NOT EXISTS answers TEXT NOT NULL DEFAULT '{}'
-  `;
+  // Migrations for existing installs
+  await sql`ALTER TABLE interview_links ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE saves ADD COLUMN IF NOT EXISTS codes   TEXT NOT NULL DEFAULT '{}'`;
+  await sql`ALTER TABLE saves ADD COLUMN IF NOT EXISTS answers TEXT NOT NULL DEFAULT '{}'`;
 
   schemaReady = true;
 }
